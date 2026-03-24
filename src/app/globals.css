@@ -1,26 +1,123 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0c0a07;
+  --foreground: #c0b8a0;
+  --font-display: var(--font-jetbrains);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-mono: var(--font-jetbrains);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* ===== VFD DISPLAY EFFECTS ===== */
+.vfd-glow {
+  text-shadow:
+    0 0 8px rgba(232, 197, 90, 0.5),
+    0 0 20px rgba(232, 197, 90, 0.2),
+    0 0 40px rgba(232, 197, 90, 0.08);
+}
+
+.vfd-dim {
+  text-shadow: 0 0 6px rgba(138, 122, 85, 0.3);
+}
+
+/* ===== DISPLAY PANEL ===== */
+.calc-display {
+  background: linear-gradient(170deg, #080c0a 0%, #0a0f0d 50%, #070b09 100%);
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.6),
+    inset 0 0 1px rgba(80, 168, 136, 0.05);
+}
+
+.calc-display::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 20, 12, 0.06) 3px,
+    rgba(0, 20, 12, 0.06) 4px
+  );
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ===== BUTTON EFFECTS ===== */
+.btn-calc {
+  transition: transform 0.08s ease, filter 0.08s ease;
+  position: relative;
+  user-select: none;
+}
+
+.btn-calc::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
+
+.btn-calc:hover:not(:active) {
+  filter: brightness(1.25);
+}
+
+.btn-calc:active {
+  transform: translateY(1px) scale(0.97);
+  filter: brightness(0.7);
+}
+
+/* ===== POWER LED ===== */
+.power-led {
+  box-shadow:
+    0 0 3px rgba(80, 168, 136, 0.8),
+    0 0 8px rgba(80, 168, 136, 0.4);
+  animation: led-pulse 3s ease-in-out infinite;
+}
+
+@keyframes led-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ===== HISTORY PANEL ===== */
+.history-enter {
+  animation: slide-up 0.25s ease-out;
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== SCROLLBAR ===== */
+.history-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.history-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.history-scroll::-webkit-scrollbar-thumb {
+  background: #2a2520;
+  border-radius: 2px;
 }
