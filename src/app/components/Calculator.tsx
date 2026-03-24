@@ -323,12 +323,7 @@ function CalcButton({ label, display, action, variant, span }: ButtonDef) {
   return (
     <button
       onClick={action}
-      className={`
-        btn-calc rounded-md flex items-center justify-center cursor-pointer
-        font-[family-name:var(--font-geist-sans)]
-        ${variantStyles[variant]}
-        ${span === 2 ? "col-span-2" : ""}
-      `}
+      className={`btn-calc rounded-md flex items-center justify-center cursor-pointer font-[family-name:var(--font-geist-sans)] ${variantStyles[variant]} ${span === 2 ? "col-span-2" : ""}`}
     >
       {display ?? label}
     </button>
@@ -581,14 +576,7 @@ export default function Calculator() {
   return (
     <div className="relative w-full max-w-[520px] mx-auto">
       {/* ===== CALCULATOR BODY ===== */}
-      <div
-        className="
-          bg-gradient-to-b from-[#171412] to-[#131110]
-          rounded-2xl border border-[#2a2520]/60
-          shadow-[0_8px_40px_rgba(0,0,0,0.5),0_2px_8px_rgba(0,0,0,0.3)]
-          overflow-hidden
-        "
-      >
+      <div className="bg-gradient-to-b from-[#171412] to-[#131110] rounded-2xl border border-[#2a2520]/60 shadow-[0_8px_40px_rgba(0,0,0,0.5),0_2px_8px_rgba(0,0,0,0.3)] overflow-hidden">
         {/* --- Header Bar --- */}
         <div className="flex items-center justify-between px-5 py-2.5 border-b border-[#2a2520]/50">
           <span className="text-[#4a4030] text-[10px] tracking-[0.35em] uppercase font-semibold font-[family-name:var(--font-geist-sans)]">
@@ -685,10 +673,7 @@ export default function Calculator() {
                       expression: entry.expression,
                     })
                   }
-                  className="
-                    w-full text-right p-3 rounded-lg cursor-pointer
-                    hover:bg-[#1a1612] transition-colors group
-                  "
+                  className="w-full text-right p-3 rounded-lg cursor-pointer hover:bg-[#1a1612] transition-colors group"
                 >
                   <div
                     className="text-[#5a5040] text-xs font-mono truncate group-hover:text-[#8a7a55] transition-colors"
