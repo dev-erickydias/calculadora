@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CountryData } from "@/data/countries";
+import { useTranslation } from "@/context/LanguageContext";
 
 interface Holiday {
   date: string;
@@ -27,14 +28,7 @@ interface HolidaysPanelProps {
   country: CountryData;
 }
 
-const MONTH_NAMES = [
-  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
-];
-
-const DAY_NAMES_FULL = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
-// European: Mon first
-const DAY_NAMES = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+// Month/day names come from translations via useTranslation()
 // EU index → JS getDay(): Mon=1, Tue=2, ..., Sat=6, Sun=0
 const EU_TO_JS: number[] = [1, 2, 3, 4, 5, 6, 0];
 
@@ -47,12 +41,12 @@ function makeDateStr(y: number, m: number, d: number): string {
 }
 
 export default function HolidaysPanel({ country }: HolidaysPanelProps) {
+  const { t } = useTranslation();
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [year, setYear] = useState(new Date().getFullYear());
   const [selectedDay, setSelectedDay] = useState<SelectedDay | null>(null);
-  // Days off: Set of EU day indices (0=Mon..6=Sun). Default: Sat(5) + Sun(6)
   const [daysOff, setDaysOff] = useState<Set<number>>(new Set([5, 6]));
 
   // Load days off from localStorage
@@ -206,8 +200,8 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
         </div>
 
         <div className="flex items-center gap-1.5 ml-auto">
-          <span className="text-xs text-white/40 mr-1">Folgas:</span>
-          {DAY_NAMES.map((name, euIdx) => (
+          <span className="text-xs text-white/40 mr-1">{t.daysOff}</span>
+          {t.dayNames.map((name, euIdx) => (
             <button
               key={euIdx}
               onClick={() => toggleDayOff(euIdx)}
@@ -222,7 +216,7 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
       {loading && (
         <div className="text-center py-8">
           <div className="inline-block w-8 h-8 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin" />
-          <p className="text-white/50 mt-2 text-sm">Carregando feriados...</p>
+          <p className="text-white/50 mt-2 text-sm">Loading...</p>
         </div>
       )}
 
@@ -238,37 +232,37 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="p-3 rounded-xl bg-amber-400/10 border border-amber-400/30 text-center">
               <p className="text-2xl font-bold text-amber-300 font-mono">{stats.workingDays}</p>
-              <p className="text-xs text-white/50">Dias úteis no ano</p>
+              <p className="text-xs text-white/50">{t.workingDaysYear}</p>
             </div>
             <div className="p-3 rounded-xl bg-cyan-400/10 border border-cyan-400/30 text-center">
               <p className="text-2xl font-bold text-cyan-300 font-mono">{stats.totalHolidays}</p>
-              <p className="text-xs text-white/50">Feriados nacionais</p>
+              <p className="text-xs text-white/50">{t.nationalHolidays}</p>
             </div>
             <div className="p-3 rounded-xl bg-green-400/10 border border-green-400/30 text-center">
               <p className="text-2xl font-bold text-green-300 font-mono">{stats.holidaysOnWorkday}</p>
-              <p className="text-xs text-white/50">Feriados em dia útil</p>
+              <p className="text-xs text-white/50">{t.holidaysOnWorkday}</p>
             </div>
             <div className="p-3 rounded-xl bg-red-400/10 border border-red-400/30 text-center">
               <p className="text-2xl font-bold text-red-300 font-mono">{stats.holidaysOnDayOff}</p>
-              <p className="text-xs text-white/50">Perdidos (dia de folga)</p>
+              <p className="text-xs text-white/50">{t.lostDaysOff}</p>
             </div>
           </div>
 
           {/* Legend */}
           <div className="flex flex-wrap gap-4 text-xs text-white/50">
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-cyan-500/40 border border-cyan-400/50" /> Feriado (dia útil)</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-red-500/30 border border-red-400/40" /> Feriado (dia de folga)</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-purple-500/25 border border-purple-400/30" /> Dia de folga</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-blue-500/30 border border-blue-400/40" /> Hoje</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-cyan-500/40 border border-cyan-400/50" /> {t.legendHolidayWorkday}</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-red-500/30 border border-red-400/40" /> {t.legendHolidayDayOff}</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-purple-500/25 border border-purple-400/30" /> {t.legendDayOff}</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-blue-500/30 border border-blue-400/40" /> {t.legendToday}</span>
           </div>
 
           {/* Calendar grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {calendarMonths.map(({ month, cells }) => (
               <div key={month} className="bg-white/[0.03] border border-white/10 rounded-xl p-3">
-                <p className="text-sm font-bold text-white/80 mb-2 text-center">{MONTH_NAMES[month]}</p>
+                <p className="text-sm font-bold text-white/80 mb-2 text-center">{t.months[month]}</p>
                 <div className="grid grid-cols-7 gap-0.5 text-center">
-                  {DAY_NAMES.map((d, i) => (
+                  {t.dayNames.map((d, i) => (
                     <span key={d} className={`text-[10px] py-0.5 font-medium ${daysOff.has(i) ? "text-purple-400/50" : "text-white/30"}`}>{d}</span>
                   ))}
                   {cells.map((cell) => {
@@ -325,10 +319,10 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
                     <div>
                       <p className="text-3xl font-bold text-white font-mono">{selectedDay.date.getDate()}</p>
                       <p className="text-sm text-white/50">
-                        {MONTH_NAMES[selectedDay.date.getMonth()]} {selectedDay.date.getFullYear()}
+                        {t.months[selectedDay.date.getMonth()]} {selectedDay.date.getFullYear()}
                       </p>
                       <p className="text-xs text-white/40">
-                        {DAY_NAMES_FULL[selectedDay.date.getDay()]}
+                        {t.dayNamesFull[selectedDay.date.getDay()]}
                       </p>
                     </div>
                     <button
@@ -341,19 +335,19 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
 
                   <div className="flex flex-wrap gap-2 mb-4">
                     {selectedDay.isToday && (
-                      <span className="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30">Hoje</span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30">{t.today}</span>
                     )}
                     {selectedDay.isDayOff && (
-                      <span className="text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-400/30">Dia de folga</span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-400/30">{t.dayOff}</span>
                     )}
                     {selectedDay.holiday && !selectedDay.isDayOff && (
-                      <span className="text-xs px-2 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">Feriado em dia útil</span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">{t.holidayOnWorkday}</span>
                     )}
                     {selectedDay.holiday && selectedDay.isDayOff && (
-                      <span className="text-xs px-2 py-1 rounded-full bg-red-500/20 text-red-300 border border-red-400/30">Feriado perdido</span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-red-500/20 text-red-300 border border-red-400/30">{t.lostHoliday}</span>
                     )}
                     {!selectedDay.holiday && !selectedDay.isDayOff && (
-                      <span className="text-xs px-2 py-1 rounded-full bg-white/5 text-white/50 border border-white/10">Dia útil</span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-white/5 text-white/50 border border-white/10">{t.normalWorkday.split("—")[0].trim()}</span>
                     )}
                   </div>
 
@@ -363,7 +357,7 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
                       <p className="text-sm text-white/60">{selectedDay.holiday.name}</p>
                       <div className="flex flex-wrap gap-2 mt-3">
                         <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-white/40">
-                          {selectedDay.holiday.fixed ? "Data fixa" : "Data variável"}
+                          {selectedDay.holiday.fixed ? t.fixedDate : t.variableDate}
                         </span>
                         {selectedDay.holiday.types.map((t) => (
                           <span key={t} className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-white/40">{t}</span>
@@ -373,7 +367,7 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
                   ) : (
                     <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-center">
                       <p className="text-white/40 text-sm">
-                        {selectedDay.isDayOff ? "Dia de folga — sem feriado." : "Dia útil normal — sem feriado."}
+                        {selectedDay.isDayOff ? `${t.dayOff}.` : t.normalWorkday}
                       </p>
                     </div>
                   )}
@@ -385,7 +379,7 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
       )}
 
       <p className="text-xs text-white/30 text-center">
-        Dados: Nager.Date API. Podem não incluir feriados regionais/locais.
+        {t.nagerDisclaimer}
       </p>
     </div>
   );
