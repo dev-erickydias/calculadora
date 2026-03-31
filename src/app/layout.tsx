@@ -14,8 +14,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ARCTAN - Calculadora Cientifica",
-  description: "Calculadora cientifica feita com Next.js, TypeScript e Tailwind CSS",
+  title: "ARCTAN - Calculadora Científica & Trabalhista EU",
+  description: "Calculadora científica e trabalhista europeia. Salários mínimos, férias, 13º salário e feriados de 27 países europeus.",
 };
 
 export default function RootLayout({
