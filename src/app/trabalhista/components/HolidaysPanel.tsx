@@ -23,7 +23,14 @@ const MONTH_NAMES = [
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
 ];
 
-const DAY_NAMES = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+// European calendar: week starts on Monday
+const DAY_NAMES = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+
+function getEuropeanDayOfWeek(date: Date): number {
+  // JS: 0=Sun, 1=Mon ... 6=Sat → European: 0=Mon, 1=Tue ... 6=Sun
+  const day = date.getDay();
+  return day === 0 ? 6 : day - 1;
+}
 
 export default function HolidaysPanel({ country }: HolidaysPanelProps) {
   const [holidays, setHolidays] = useState<Holiday[]>([]);
@@ -33,6 +40,7 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
 
   useEffect(() => {
+    let cancelled = false;
     const fetchHolidays = async () => {
       setLoading(true);
       setError(null);
@@ -42,15 +50,20 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
         );
         if (!res.ok) throw new Error("Erro ao buscar feriados");
         const data: Holiday[] = await res.json();
-        setHolidays(data.filter((h) => h.global));
+        if (!cancelled) {
+          setHolidays(data.filter((h) => h.global));
+        }
       } catch {
-        setError("Não foi possível carregar os feriados. Tente novamente.");
-        setHolidays([]);
+        if (!cancelled) {
+          setError("Não foi possível carregar os feriados. Tente novamente.");
+          setHolidays([]);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
     fetchHolidays();
+    return () => { cancelled = true; };
   }, [country.code, year]);
 
   const stats = useMemo(() => {
@@ -70,8 +83,10 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
     const totalDays = isLeapYear ? 366 : 365;
 
     let weekendDays = 0;
-    for (let d = new Date(year, 0, 1); d.getFullYear() === year; d.setDate(d.getDate() + 1)) {
+    const d = new Date(year, 0, 1);
+    while (d.getFullYear() === year) {
       if (d.getDay() === 0 || d.getDay() === 6) weekendDays++;
+      d.setDate(d.getDate() + 1);
     }
 
     const workingDays = totalDays - weekendDays - holidaysOnWeekday;
@@ -85,29 +100,36 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
     };
   }, [holidays, year]);
 
+  const holidaySet = useMemo(() => {
+    const set = new Map<string, string>();
+    holidays.forEach((h) => set.set(h.date, h.localName));
+    return set;
+  }, [holidays]);
+
   const calendarData = useMemo(() => {
-    const months: { month: number; days: { date: number; isHoliday: boolean; holidayName?: string; isWeekend: boolean; isCurrentMonth: boolean }[][] }[] = [];
+    const months: { month: number; weeks: { key: string; date: number; isHoliday: boolean; holidayName?: string; isWeekend: boolean; isCurrentMonth: boolean }[][] }[] = [];
 
     for (let m = 0; m < 12; m++) {
-      const firstDay = new Date(year, m, 1).getDay();
+      const firstDayEU = getEuropeanDayOfWeek(new Date(year, m, 1));
       const daysInMonth = new Date(year, m + 1, 0).getDate();
-      const weeks: { date: number; isHoliday: boolean; holidayName?: string; isWeekend: boolean; isCurrentMonth: boolean }[][] = [];
-      let week: { date: number; isHoliday: boolean; holidayName?: string; isWeekend: boolean; isCurrentMonth: boolean }[] = [];
+      const weeks: { key: string; date: number; isHoliday: boolean; holidayName?: string; isWeekend: boolean; isCurrentMonth: boolean }[][] = [];
+      let week: { key: string; date: number; isHoliday: boolean; holidayName?: string; isWeekend: boolean; isCurrentMonth: boolean }[] = [];
 
-      for (let i = 0; i < firstDay; i++) {
-        week.push({ date: 0, isHoliday: false, isWeekend: false, isCurrentMonth: false });
+      for (let i = 0; i < firstDayEU; i++) {
+        week.push({ key: `empty-${m}-${i}`, date: 0, isHoliday: false, isWeekend: false, isCurrentMonth: false });
       }
 
       for (let d = 1; d <= daysInMonth; d++) {
         const dateStr = `${year}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-        const holiday = holidays.find((h) => h.date === dateStr);
-        const dayOfWeek = new Date(year, m, d).getDay();
+        const holidayName = holidaySet.get(dateStr);
+        const euDay = getEuropeanDayOfWeek(new Date(year, m, d));
 
         week.push({
+          key: dateStr,
           date: d,
-          isHoliday: !!holiday,
-          holidayName: holiday?.localName,
-          isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
+          isHoliday: !!holidayName,
+          holidayName,
+          isWeekend: euDay >= 5, // 5=Sat, 6=Sun
           isCurrentMonth: true,
         });
 
@@ -119,16 +141,16 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
 
       if (week.length > 0) {
         while (week.length < 7) {
-          week.push({ date: 0, isHoliday: false, isWeekend: false, isCurrentMonth: false });
+          week.push({ key: `pad-${m}-${week.length}`, date: 0, isHoliday: false, isWeekend: false, isCurrentMonth: false });
         }
         weeks.push(week);
       }
 
-      months.push({ month: m, days: weeks });
+      months.push({ month: m, weeks });
     }
 
     return months;
-  }, [holidays, year]);
+  }, [holidaySet, year]);
 
   return (
     <div className="space-y-4">
@@ -212,6 +234,7 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
                   const date = new Date(h.date + "T00:00:00");
                   const dayOfWeek = date.getDay();
                   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                  const euDay = getEuropeanDayOfWeek(date);
 
                   return (
                     <motion.div
@@ -231,7 +254,7 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
                       </div>
                       <div className="text-right shrink-0">
                         <p className={`text-xs font-medium ${isWeekend ? "text-red-400/80" : "text-green-400/80"}`}>
-                          {DAY_NAMES[dayOfWeek]}
+                          {DAY_NAMES[euDay]}
                         </p>
                         {isWeekend && (
                           <p className="text-[10px] text-red-400/60">Fim de semana</p>
@@ -249,16 +272,16 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
                 exit={{ opacity: 0 }}
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               >
-                {calendarData.map(({ month, days }) => (
+                {calendarData.map(({ month, weeks }) => (
                   <div key={month} className="bg-white/5 border border-white/10 rounded-xl p-3">
                     <p className="text-sm font-bold text-white/80 mb-2 text-center">{MONTH_NAMES[month]}</p>
                     <div className="grid grid-cols-7 gap-0.5 text-center">
                       {DAY_NAMES.map((d) => (
                         <span key={d} className="text-[10px] text-white/30 py-0.5">{d}</span>
                       ))}
-                      {days.flat().map((day, i) => (
+                      {weeks.flat().map((day) => (
                         <span
-                          key={i}
+                          key={day.key}
                           title={day.holidayName}
                           className={`text-xs py-1 rounded ${!day.isCurrentMonth ? "" : day.isHoliday ? "bg-amber-400/20 text-amber-300 font-bold" : day.isWeekend ? "text-white/25" : "text-white/60"}`}
                         >

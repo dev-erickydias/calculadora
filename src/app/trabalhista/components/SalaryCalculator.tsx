@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CountryData } from "@/data/countries";
 
@@ -11,6 +11,23 @@ interface SalaryCalculatorProps {
 export default function SalaryCalculator({ country }: SalaryCalculatorProps) {
   const [customSalary, setCustomSalary] = useState<string>("");
   const [showNet, setShowNet] = useState(false);
+
+  // Load saved salary for this country from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(`salary_${country.code}`);
+    if (saved) setCustomSalary(saved);
+    else setCustomSalary("");
+  }, [country.code]);
+
+  // Save salary to localStorage
+  useEffect(() => {
+    if (customSalary) {
+      localStorage.setItem(`salary_${country.code}`, customSalary);
+      localStorage.setItem("customSalary", customSalary);
+    } else {
+      localStorage.removeItem(`salary_${country.code}`);
+    }
+  }, [customSalary, country.code]);
 
   const baseSalary = customSalary
     ? parseFloat(customSalary)
@@ -85,7 +102,7 @@ export default function SalaryCalculator({ country }: SalaryCalculatorProps) {
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
         <div className="flex-1">
           <label className="block text-sm text-white/60 mb-1">
-            Salário mensal bruto ({country.currencySymbol})
+            Salário mensal bruto (€)
           </label>
           <input
             type="number"
@@ -99,6 +116,7 @@ export default function SalaryCalculator({ country }: SalaryCalculatorProps) {
           <p className="text-xs text-white/40 mt-1">
             Mínimo: {formatEur(country.minimumWage.grossMonthly)} €
             {country.minimumWage.hourlyRate && ` (${country.minimumWage.hourlyRate} €/hora)`}
+            {country.minimumWage.definedPer === "hour" && " — definido por hora"}
           </p>
         </div>
 
@@ -117,11 +135,11 @@ export default function SalaryCalculator({ country }: SalaryCalculatorProps) {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
         >
           {[
-            { label: "Por Hora", value: calculations.hourly, icon: "clock" },
-            { label: "Por Dia", value: calculations.daily, icon: "sun" },
-            { label: "Por Semana", value: calculations.weekly, icon: "calendar-week" },
-            { label: "Por Mês", value: calculations.monthly, icon: "calendar" },
-            { label: "Por Ano", value: calculations.annual, icon: "banknotes", highlight: true },
+            { label: "Por Hora", value: calculations.hourly },
+            { label: "Por Dia", value: calculations.daily },
+            { label: "Por Semana", value: calculations.weekly },
+            { label: "Por Mês", value: calculations.monthly },
+            { label: `Por Ano (${country.minimumWage.annualPayments}x)`, value: calculations.annual, highlight: true },
           ].map((item) => (
             <motion.div
               key={item.label}
@@ -147,9 +165,10 @@ export default function SalaryCalculator({ country }: SalaryCalculatorProps) {
         <div className="flex flex-wrap gap-x-6 gap-y-1">
           <span>Jornada: <strong className="text-white/70">{country.workWeek.standardHours}h/semana</strong></span>
           <span>Pagamentos: <strong className="text-white/70">{country.minimumWage.annualPayments}x/ano</strong></span>
-          <span>Fonte: <strong className="text-white/70">{country.minimumWage.source}</strong></span>
+          <span>Definido por: <strong className="text-white/70">{country.minimumWage.definedPer === "hour" ? "hora" : country.minimumWage.definedPer === "week" ? "semana" : "mês"}</strong></span>
           <span>Vigência: <strong className="text-white/70">{country.minimumWage.effectiveDate}</strong></span>
         </div>
+        <p className="text-xs text-white/30 mt-1">Fonte: {country.minimumWage.source}</p>
         {showNet && (
           <p className="text-xs text-yellow-400/60 mt-2">
             {country.taxes.disclaimer}
