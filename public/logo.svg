@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 48" fill="none">
+  <!-- S icon mark -->
+  <rect x="0" y="0" width="48" height="48" rx="12" fill="url(#grad)"/>
+  <path d="M24 10C18.5 10 14 13.5 14 18c0 3.5 2.5 5.5 6 7 3 1.3 4 2.2 4 3.5 0 1.5-1.5 2.5-3.5 2.5-2.5 0-4.5-1.5-5.5-3l-3 2.5C14 33 17.5 35 21 35c5 0 9-3 9-7.5 0-4-2.5-5.8-6.5-7.5-2.5-1-3.5-2-3.5-3.2 0-1.3 1.3-2.3 3.2-2.3 2 0 3.5 1 4.5 2.5l2.8-2.3C28.5 12 26 10 24 10z" fill="white" opacity="0.95"/>
+  <!-- Stars (EU reference) -->
+  <circle cx="10" cy="8" r="1.2" fill="#FBBF24"/>
+  <circle cx="14" cy="5" r="1.2" fill="#FBBF24"/>
+  <circle cx="38" cy="8" r="1.2" fill="#FBBF24"/>
+  <circle cx="34" cy="5" r="1.2" fill="#FBBF24"/>
+  <circle cx="24" cy="4" r="1.2" fill="#FBBF24"/>
+  <!-- Text -->
+  <text x="60" y="33" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="28" fill="white" letter-spacing="-0.5">Salarium</text>
+  <text x="60" y="44" font-family="system-ui, -apple-system, sans-serif" font-weight="400" font-size="10" fill="#94A3B8" letter-spacing="2">CALCULADORA TRABALHISTA EU</text>
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1E40AF"/>
+      <stop offset="100%" stop-color="#1E3A8A"/>
+    </linearGradient>
+  </defs>
+</svg>
