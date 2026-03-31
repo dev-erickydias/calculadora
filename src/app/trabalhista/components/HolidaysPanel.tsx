@@ -74,7 +74,8 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
     let holidaysOnWeekend = 0;
 
     holidays.forEach((h) => {
-      const day = new Date(h.date + "T00:00:00").getDay();
+      const [y, m, d] = h.date.split("-").map(Number);
+      const day = new Date(y, m - 1, d).getDay();
       if (day === 0 || day === 6) holidaysOnWeekend++;
       else holidaysOnWeekday++;
     });
@@ -83,13 +84,25 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
     const totalDays = isLeapYear ? 366 : 365;
 
     let weekendDays = 0;
-    const d = new Date(year, 0, 1);
-    while (d.getFullYear() === year) {
-      if (d.getDay() === 0 || d.getDay() === 6) weekendDays++;
-      d.setDate(d.getDate() + 1);
+    // Count unique holiday dates that fall on weekdays (to avoid double-counting)
+    const holidayWeekdayDates = new Set<string>();
+    holidays.forEach((h) => {
+      const [y, m, d] = h.date.split("-").map(Number);
+      const day = new Date(y, m - 1, d).getDay();
+      if (day !== 0 && day !== 6) {
+        holidayWeekdayDates.add(h.date);
+      }
+    });
+
+    for (let m = 0; m < 12; m++) {
+      const daysInMonth = new Date(year, m + 1, 0).getDate();
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dayOfWeek = new Date(year, m, d).getDay();
+        if (dayOfWeek === 0 || dayOfWeek === 6) weekendDays++;
+      }
     }
 
-    const workingDays = totalDays - weekendDays - holidaysOnWeekday;
+    const workingDays = totalDays - weekendDays - holidayWeekdayDates.size;
 
     return {
       totalHolidays,
@@ -231,7 +244,8 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
                 className="space-y-2"
               >
                 {holidays.map((h, i) => {
-                  const date = new Date(h.date + "T00:00:00");
+                  const [hy, hm, hd] = h.date.split("-").map(Number);
+                  const date = new Date(hy, hm - 1, hd);
                   const dayOfWeek = date.getDay();
                   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
                   const euDay = getEuropeanDayOfWeek(date);
