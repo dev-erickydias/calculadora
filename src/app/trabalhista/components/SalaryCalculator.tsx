@@ -1,58 +1,57 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { CountryData } from "@/data/countries";
 import { useTranslation } from "@/context/LanguageContext";
+import { formatCurrency, WEEKS_PER_MONTH } from "@/lib/format";
 
 type InputMode = "hour" | "month";
 interface Props { country: CountryData; }
 
+const fadeUp = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.3 } };
+
+function setLS(key: string, val: string) { if (val) localStorage.setItem(key, val); else localStorage.removeItem(key); }
+
 export default function SalaryCalculator({ country }: Props) {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const [inputMode, setInputMode] = useState<InputMode>("hour");
   const [customHourly, setCustomHourly] = useState<string>("");
   const [customMonthly, setCustomMonthly] = useState<string>("");
   const [dailyHours, setDailyHours] = useState<string>("");
   const [daysWorked, setDaysWorked] = useState<string>("");
   const [showNet, setShowNet] = useState(false);
+  const isLoading = useRef(true);
 
-  // Load from localStorage
   useEffect(() => {
-    const mode = localStorage.getItem(`inputMode_${country.code}`) as InputMode | null;
-    if (mode) setInputMode(mode);
-    const sh = localStorage.getItem(`hourly_${country.code}`);
-    if (sh) setCustomHourly(sh); else setCustomHourly("");
-    const sm = localStorage.getItem(`monthly_${country.code}`);
-    if (sm) setCustomMonthly(sm); else setCustomMonthly("");
-    const sdh = localStorage.getItem(`dailyHours_${country.code}`);
-    if (sdh) setDailyHours(sdh); else setDailyHours("");
-    const sd = localStorage.getItem(`days_${country.code}`);
-    if (sd) setDaysWorked(sd); else setDaysWorked("");
+    isLoading.current = true;
+    const c = country.code;
+    setInputMode((localStorage.getItem(`inputMode_${c}`) as InputMode) || "hour");
+    setCustomHourly(localStorage.getItem(`hourly_${c}`) || "");
+    setCustomMonthly(localStorage.getItem(`monthly_${c}`) || "");
+    setDailyHours(localStorage.getItem(`dailyHours_${c}`) || "");
+    setDaysWorked(localStorage.getItem(`days_${c}`) || "");
+    requestAnimationFrame(() => { isLoading.current = false; });
   }, [country.code]);
 
-  // Save to localStorage
   useEffect(() => {
-    localStorage.setItem(`inputMode_${country.code}`, inputMode);
-    if (customHourly) localStorage.setItem(`hourly_${country.code}`, customHourly);
-    else localStorage.removeItem(`hourly_${country.code}`);
-    if (customMonthly) localStorage.setItem(`monthly_${country.code}`, customMonthly);
-    else localStorage.removeItem(`monthly_${country.code}`);
-    if (dailyHours) localStorage.setItem(`dailyHours_${country.code}`, dailyHours);
-    else localStorage.removeItem(`dailyHours_${country.code}`);
-    if (daysWorked) localStorage.setItem(`days_${country.code}`, daysWorked);
-    else localStorage.removeItem(`days_${country.code}`);
+    if (isLoading.current) return;
+    const c = country.code;
+    localStorage.setItem(`inputMode_${c}`, inputMode);
+    setLS(`hourly_${c}`, customHourly);
+    setLS(`monthly_${c}`, customMonthly);
+    setLS(`dailyHours_${c}`, dailyHours);
+    setLS(`days_${c}`, daysWorked);
   }, [inputMode, customHourly, customMonthly, dailyHours, daysWorked, country.code]);
 
   const { standardHours, daysPerWeek } = country.workWeek;
-  const weeksPerMonth = 4.33;
   const defaultHoursPerDay = standardHours / daysPerWeek;
-  const standardMonthlyHours = Math.round(standardHours * weeksPerMonth);
-  const standardMonthlyDays = Math.round(daysPerWeek * weeksPerMonth);
+  const standardMonthlyHours = Math.round(standardHours * WEEKS_PER_MONTH);
+  const standardMonthlyDays = Math.round(daysPerWeek * WEEKS_PER_MONTH);
 
   const defaultHourly = country.minimumWage.hourlyRate
     ? country.minimumWage.hourlyRate
-    : country.minimumWage.grossMonthly / (standardHours * weeksPerMonth);
+    : country.minimumWage.grossMonthly / (standardHours * WEEKS_PER_MONTH);
 
   const defaultMonthly = country.minimumWage.grossMonthly;
 
@@ -114,14 +113,12 @@ export default function SalaryCalculator({ country }: Props) {
       grossWithOvertime,
       hasCustomSchedule,
     };
-  }, [inputMode, customHourly, customMonthly, defaultHourly, defaultMonthly, country, inputDailyHours, inputDays, standardMonthlyHours, standardMonthlyDays, defaultHoursPerDay, daysPerWeek, weeksPerMonth]);
+  }, [inputMode, customHourly, customMonthly, defaultHourly, defaultMonthly, country, inputDailyHours, inputDays, standardMonthlyHours, standardMonthlyDays, defaultHoursPerDay, daysPerWeek, WEEKS_PER_MONTH]);
 
-  const fmt = (v: number) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const fmtLocal = (v: number) => {
-    if (country.currency === "EUR") return null;
-    const rate = country.minimumWage.grossMonthlyLocal ? country.minimumWage.grossMonthlyLocal / country.minimumWage.grossMonthly : 1;
-    return `${(v * rate).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${country.currencySymbol}`;
-  };
+  const fmt = (v: number) => formatCurrency(v, lang);
+  const localRate = country.currency !== "EUR" && country.minimumWage.grossMonthlyLocal
+    ? country.minimumWage.grossMonthlyLocal / country.minimumWage.grossMonthly : null;
+  const fmtLocal = (v: number) => localRate ? `${formatCurrency(v * localRate, lang)} ${country.currencySymbol}` : null;
 
   if (!country.hasStatutoryMinimumWage && !customHourly && !customMonthly) {
     return (
@@ -190,7 +187,7 @@ export default function SalaryCalculator({ country }: Props) {
       </div>
 
       {calc && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+        <motion.div {...fadeUp} className="space-y-5">
           {/* Standard breakdown */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {[

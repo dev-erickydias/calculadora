@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CountryData, countriesWithMinWage, countriesWithoutMinWage } from "@/data/countries";
 import { useTranslation } from "@/context/LanguageContext";
+import { formatCurrency } from "@/lib/format";
 
 interface CountrySelectorProps {
   selected: CountryData | null;
@@ -11,7 +12,7 @@ interface CountrySelectorProps {
 }
 
 export default function CountrySelector({ selected, onSelect }: CountrySelectorProps) {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const [search, setSearch] = useState("");
   const [showNoMinWage, setShowNoMinWage] = useState(false);
 
@@ -43,7 +44,7 @@ export default function CountrySelector({ selected, onSelect }: CountrySelectorP
               className={`flex flex-col items-center gap-1 p-3 rounded-xl border transition-colors cursor-pointer ${selected?.code === country.code ? "bg-blue-400/15 border-blue-400/50 shadow-lg shadow-blue-400/10" : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"}`}>
               <span className="text-2xl">{country.flag}</span>
               <span className="text-xs font-medium text-white/90 text-center leading-tight">{country.name}</span>
-              <span className="text-[10px] text-blue-400/80 font-mono">{country.minimumWage.grossMonthly.toLocaleString("pt-BR")} €</span>
+              <span className="text-[10px] text-blue-400/80 font-mono">{formatCurrency(country.minimumWage.grossMonthly, lang)} €</span>
             </motion.button>
           ))}
         </AnimatePresence>

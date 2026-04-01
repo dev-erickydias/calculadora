@@ -1,33 +1,39 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CountryData } from "@/data/countries";
 import { useTranslation } from "@/context/LanguageContext";
+import { formatCurrency, WEEKS_PER_MONTH } from "@/lib/format";
 
 interface Props { country: CountryData; }
 
+const fadeUp = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.3 } };
+
 export default function ThirteenthSalaryCalculator({ country }: Props) {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const [monthsWorked, setMonthsWorked] = useState(12);
   const [customSalary, setCustomSalary] = useState<string>("");
+
+  useEffect(() => { setCustomSalary(""); setMonthsWorked(12); }, [country.code]);
+
   const baseSalary = customSalary ? parseFloat(customSalary) : country.minimumWage.grossMonthly;
+  const fmt = (v: number) => formatCurrency(v, lang);
 
   const calc = useMemo(() => {
     if (!baseSalary || baseSalary <= 0) return null;
     const thirteenth = (baseSalary / 12) * monthsWorked;
     const fourteenth = country.thirteenthSalary.payments >= 2 ? thirteenth : 0;
-    const vakantiegeld = country.holidays.hasVacationBonus && country.holidays.vacationBonusRate ? baseSalary * 12 * country.holidays.vacationBonusRate : 0;
+    const vakantiegeld = country.holidays.hasVacationBonus && country.holidays.vacationBonusRate
+      ? baseSalary * 12 * country.holidays.vacationBonusRate : 0;
     const hasThirteenth = country.thirteenthSalary.mandatory || country.thirteenthSalary.payments > 0;
     const hasVak = country.holidays.hasVacationBonus && (country.holidays.vacationBonusRate ?? 0) > 0;
     const totalExtra = country.thirteenthSalary.mandatory ? thirteenth + fourteenth : vakantiegeld > 0 ? vakantiegeld : 0;
     return { thirteenth, fourteenth, vakantiegeld, totalExtra, hasThirteenth, hasVak };
-  }, [baseSalary, monthsWorked, country]);
-
-  const fmt = (v: number) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }, [baseSalary, monthsWorked, country.thirteenthSalary, country.holidays]);
 
   return (
-    <div className="space-y-4">
+    <motion.div {...fadeUp} className="space-y-4">
       <div className="bg-white/5 border border-white/10 rounded-xl p-4">
         <p className="text-sm text-white/70 mb-3">{country.thirteenthSalary.description}</p>
         {!country.hasStatutoryMinimumWage && (
@@ -44,29 +50,29 @@ export default function ThirteenthSalaryCalculator({ country }: Props) {
         </div>
       </div>
       {calc && baseSalary > 0 && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
           {calc.hasThirteenth && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-4 rounded-xl bg-blue-400/10 border border-blue-400/30">
+              <motion.div {...fadeUp} className="p-4 rounded-xl bg-blue-400/10 border border-blue-400/30">
                 <p className="text-xs text-white/50 uppercase tracking-wider mb-1">{t.thirteenthProportional}</p>
                 <p className="text-xl font-bold text-white font-mono">{fmt(calc.thirteenth)} €</p>
                 <p className="text-xs text-white/40 mt-1">({monthsWorked}/12 {t.twelfths})</p>
-              </div>
+              </motion.div>
               {calc.fourteenth > 0 && (
-                <div className="p-4 rounded-xl bg-orange-400/10 border border-orange-400/30">
+                <motion.div {...fadeUp} transition={{ delay: 0.1 }} className="p-4 rounded-xl bg-orange-400/10 border border-orange-400/30">
                   <p className="text-xs text-white/50 uppercase tracking-wider mb-1">{t.fourteenthProportional}</p>
                   <p className="text-xl font-bold text-white font-mono">{fmt(calc.fourteenth)} €</p>
                   <p className="text-xs text-white/40 mt-1">({monthsWorked}/12 {t.twelfths})</p>
-                </div>
+                </motion.div>
               )}
             </div>
           )}
           {calc.hasVak && (
-            <div className="p-4 rounded-xl bg-cyan-400/10 border border-cyan-400/30">
+            <motion.div {...fadeUp} transition={{ delay: 0.15 }} className="p-4 rounded-xl bg-cyan-400/10 border border-cyan-400/30">
               <p className="text-xs text-white/50 uppercase tracking-wider mb-1">{t.vacationBonus}</p>
               <p className="text-xl font-bold text-white font-mono">{fmt(calc.vakantiegeld)} €</p>
               <p className="text-xs text-white/40 mt-1">{country.holidays.vacationBonusDescription}</p>
-            </div>
+            </motion.div>
           )}
           {!calc.hasThirteenth && !calc.hasVak && (
             <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
@@ -75,13 +81,13 @@ export default function ThirteenthSalaryCalculator({ country }: Props) {
             </div>
           )}
           {calc.totalExtra > 0 && (
-            <div className="p-4 rounded-xl bg-green-400/10 border border-green-400/30">
+            <motion.div {...fadeUp} transition={{ delay: 0.2 }} className="p-4 rounded-xl bg-green-400/10 border border-green-400/30">
               <p className="text-xs text-white/50 uppercase tracking-wider mb-1">{t.totalExtraPayments}</p>
               <p className="text-2xl font-bold text-green-300 font-mono">{fmt(calc.totalExtra)} €</p>
-            </div>
+            </motion.div>
           )}
         </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }

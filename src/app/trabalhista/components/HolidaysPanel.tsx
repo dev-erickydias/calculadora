@@ -28,10 +28,6 @@ interface HolidaysPanelProps {
   country: CountryData;
 }
 
-// Month/day names come from translations via useTranslation()
-// EU index → JS getDay(): Mon=1, Tue=2, ..., Sat=6, Sun=0
-const EU_TO_JS: number[] = [1, 2, 3, 4, 5, 6, 0];
-
 function toEuDay(jsDay: number): number {
   return jsDay === 0 ? 6 : jsDay - 1;
 }
@@ -39,6 +35,12 @@ function toEuDay(jsDay: number): number {
 function makeDateStr(y: number, m: number, d: number): string {
   return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 }
+
+function checkDayOff(jsDay: number, offSet: Set<number>): boolean {
+  return offSet.has(toEuDay(jsDay));
+}
+
+const fadeUp = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.3 } };
 
 export default function HolidaysPanel({ country }: HolidaysPanelProps) {
   const { t } = useTranslation();
@@ -49,17 +51,13 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
   const [selectedDay, setSelectedDay] = useState<SelectedDay | null>(null);
   const [daysOff, setDaysOff] = useState<Set<number>>(new Set([5, 6]));
 
-  // Load days off from localStorage
   useEffect(() => {
     const saved = localStorage.getItem(`daysOff_${country.code}`);
     if (saved) {
-      try {
-        setDaysOff(new Set(JSON.parse(saved)));
-      } catch { /* ignore */ }
+      try { setDaysOff(new Set(JSON.parse(saved))); } catch { /* ignore */ }
     }
   }, [country.code]);
 
-  // Save days off to localStorage
   const toggleDayOff = useCallback((euIdx: number) => {
     setDaysOff((prev) => {
       const next = new Set(prev);
@@ -69,10 +67,6 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
       return next;
     });
   }, [country.code]);
-
-  function isDayOff(jsDay: number): boolean {
-    return daysOff.has(toEuDay(jsDay));
-  }
 
   const today = useMemo(() => {
     const now = new Date();
@@ -117,7 +111,7 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
     for (let m = 0; m < 12; m++) {
       const dim = new Date(year, m + 1, 0).getDate();
       for (let d = 1; d <= dim; d++) {
-        if (isDayOff(new Date(year, m, d).getDay())) offDays++;
+        if (checkDayOff(new Date(year, m, d).getDay(), daysOff)) offDays++;
       }
     }
 
@@ -129,14 +123,13 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
       if (countedDates.has(h.date)) return;
       countedDates.add(h.date);
       const [y, m, d] = h.date.split("-").map(Number);
-      if (isDayOff(new Date(y, m - 1, d).getDay())) holidaysOnDayOff++;
+      if (checkDayOff(new Date(y, m - 1, d).getDay(), daysOff)) holidaysOnDayOff++;
       else holidaysOnWorkday++;
     });
 
     const workingDays = totalDays - offDays - holidaysOnWorkday;
 
     return { totalHolidays: countedDates.size, holidaysOnWorkday, holidaysOnDayOff, workingDays };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [holidays, year, daysOff]);
 
   const calendarMonths = useMemo(() => {
@@ -161,7 +154,7 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
           dateStr,
           isHoliday: !!holiday,
           holiday,
-          isDayOff: isDayOff(jsDay),
+          isDayOff: checkDayOff(jsDay, daysOff),
           inMonth: true,
           isToday: dateStr === today,
         });
@@ -173,7 +166,6 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
 
       return { month: m, cells };
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [holidayMap, year, today, daysOff]);
 
   const handleDayClick = useCallback((cell: { date: number; dateStr: string; isHoliday: boolean; holiday?: Holiday; isDayOff: boolean; inMonth: boolean; isToday: boolean }) => {
@@ -190,7 +182,7 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
   }, []);
 
   return (
-    <div className="space-y-4">
+    <motion.div {...fadeUp} className="space-y-4">
       {/* Year selector + Day off picker */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
@@ -271,8 +263,6 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
                     let cls = "text-xs py-1 rounded transition-colors ";
                     if (!cell.inMonth) {
                       cls += "opacity-0";
-                    } else if (cell.isToday && cell.isHoliday) {
-                      cls += "bg-blue-500/30 text-blue-200 font-bold ring-1 ring-blue-400/50 cursor-pointer";
                     } else if (cell.isToday) {
                       cls += "bg-blue-500/30 text-blue-200 font-bold ring-1 ring-blue-400/50 cursor-pointer";
                     } else if (cell.isHoliday && cell.isDayOff) {
@@ -361,8 +351,8 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
                         <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-white/40">
                           {selectedDay.holiday.fixed ? t.fixedDate : t.variableDate}
                         </span>
-                        {selectedDay.holiday.types.map((t) => (
-                          <span key={t} className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-white/40">{t}</span>
+                        {selectedDay.holiday.types.map((type) => (
+                          <span key={type} className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-white/40">{type}</span>
                         ))}
                       </div>
                     </div>
@@ -383,6 +373,6 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
       <p className="text-xs text-white/30 text-center">
         {t.nagerDisclaimer}
       </p>
-    </div>
+    </motion.div>
   );
 }

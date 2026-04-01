@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CountryData } from "@/data/countries";
+import { CountryData, getCountryByCode } from "@/data/countries";
 import { langList } from "@/data/translations";
 import { useTranslation } from "@/context/LanguageContext";
+import { formatCurrency } from "@/lib/format";
 import { saveCalculation } from "@/lib/supabase";
 import CountrySelector from "./trabalhista/components/CountrySelector";
 import SalaryCalculator from "./trabalhista/components/SalaryCalculator";
@@ -30,18 +31,14 @@ export default function Home() {
     { id: "feriados", label: t.tabHolidays, icon: "📅" },
   ];
 
-  useEffect(() => { setMounted(true); }, []);
-
   useEffect(() => {
-    if (!mounted) return;
+    setMounted(true);
     const storedCode = localStorage.getItem("selectedCountryCode");
-    if (storedCode && !selectedCountry) {
-      import("@/data/countries").then(({ getCountryByCode }) => {
-        const c = getCountryByCode(storedCode);
-        if (c) setSelectedCountry(c);
-      });
+    if (storedCode) {
+      const c = getCountryByCode(storedCode);
+      if (c) setSelectedCountry(c);
     }
-  }, [mounted, selectedCountry]);
+  }, []);
 
   const handleCountrySelect = useCallback((country: CountryData) => {
     setSelectedCountry(country);
@@ -50,10 +47,11 @@ export default function Home() {
 
   const handleTabCalc = useCallback((tab: Tab) => {
     if (selectedCountry) {
-      const salary = localStorage.getItem(`salary_${selectedCountry.code}`);
+      const hourly = localStorage.getItem(`hourly_${selectedCountry.code}`);
+      const monthly = localStorage.getItem(`monthly_${selectedCountry.code}`);
       saveCalculation(
         selectedCountry.code,
-        salary ? parseFloat(salary) : null,
+        hourly ? parseFloat(hourly) : monthly ? parseFloat(monthly) : null,
         tab === "decimo" ? "thirteenth" : tab === "ferias" ? "vacation" : "salary",
         { tab, country: selectedCountry.code, timestamp: Date.now() }
       );
@@ -152,14 +150,14 @@ export default function Home() {
                   {selectedCountry.hasStatutoryMinimumWage && (
                     <div className="text-right shrink-0">
                       <p className="text-xl sm:text-3xl font-bold text-blue-400 font-mono">
-                        {selectedCountry.minimumWage.grossMonthly.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                        {formatCurrency(selectedCountry.minimumWage.grossMonthly, lang)} €
                       </p>
                       <p className="text-[10px] sm:text-xs text-white/30">
                         {t.grossMonthly}
                         {selectedCountry.minimumWage.definedPer === "hour" && selectedCountry.minimumWage.hourlyRate && (<> ({selectedCountry.minimumWage.hourlyRate} €/h)</>)}
                       </p>
                       {selectedCountry.minimumWage.grossMonthlyLocal && (
-                        <p className="text-xs sm:text-sm text-white/40 font-mono">{selectedCountry.minimumWage.grossMonthlyLocal.toLocaleString("pt-BR")} {selectedCountry.currencySymbol}</p>
+                        <p className="text-xs sm:text-sm text-white/40 font-mono">{formatCurrency(selectedCountry.minimumWage.grossMonthlyLocal, lang)} {selectedCountry.currencySymbol}</p>
                       )}
                     </div>
                   )}
@@ -170,14 +168,14 @@ export default function Home() {
                     <div className="flex flex-wrap gap-2">
                       {selectedCountry.minimumWage.ageBasedRates.map((r) => (
                         <span key={r.age} className="text-xs bg-white/[0.04] border border-white/[0.08] rounded-lg px-2 py-1 font-mono text-white/60">
-                          {r.age}: {r.percentage}%{r.hourlyRate ? ` (${r.hourlyRate} €/h)` : r.monthlyRate ? ` (${r.monthlyRate.toLocaleString("pt-BR")} €)` : ""}
+                          {r.age}: {r.percentage}%{r.hourlyRate ? ` (${r.hourlyRate} €/h)` : r.monthlyRate ? ` (${formatCurrency(r.monthlyRate, lang)} €)` : ""}
                         </span>
                       ))}
                     </div>
                   </div>
                 )}
                 {selectedCountry.minimumWage.skilledWorkerRate && (<p className="text-xs text-blue-400/50 mt-2">{selectedCountry.minimumWage.skilledWorkerRate.description}</p>)}
-                {selectedCountry.minimumWage.probationRate && (<p className="text-xs text-orange-400/50 mt-1">{t.probationPeriod}: {selectedCountry.minimumWage.probationRate.grossMonthly.toLocaleString("pt-BR")} €/m — {selectedCountry.minimumWage.probationRate.duration}</p>)}
+                {selectedCountry.minimumWage.probationRate && (<p className="text-xs text-orange-400/50 mt-1">{t.probationPeriod}: {formatCurrency(selectedCountry.minimumWage.probationRate.grossMonthly, lang)} €/m — {selectedCountry.minimumWage.probationRate.duration}</p>)}
                 {!selectedCountry.hasStatutoryMinimumWage && selectedCountry.notes && (
                   <div className="bg-blue-500/[0.08] border border-blue-400/15 rounded-xl p-3 mt-2"><p className="text-sm text-blue-300/70">{selectedCountry.notes}</p></div>
                 )}
