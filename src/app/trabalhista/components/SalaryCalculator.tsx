@@ -60,66 +60,61 @@ export default function SalaryCalculator({ country }: Props) {
   const inputDays = daysWorked ? parseFloat(daysWorked) : null;
 
   const calc = useMemo(() => {
-    // Effective hours/day and days/month (user input or country default)
-    const effectiveHpd = inputDailyHours !== null && inputDailyHours > 0 ? inputDailyHours : defaultHoursPerDay;
-    const effectiveDays = inputDays !== null && inputDays > 0 ? inputDays : standardMonthlyDays;
-    const effectiveTotalHours = effectiveHpd * effectiveDays;
+    // User's actual schedule
+    const userHpd = inputDailyHours !== null && inputDailyHours > 0 ? inputDailyHours : defaultHoursPerDay;
+    const userDays = inputDays !== null && inputDays > 0 ? inputDays : standardMonthlyDays;
+    const userTotalHours = userHpd * userDays;
+    const hasCustomSchedule = inputDailyHours !== null || inputDays !== null;
 
-    // Derive hourly rate based on mode
+    // Derive hourly rate
     let hourly: number;
     if (inputMode === "hour") {
       hourly = customHourly ? parseFloat(customHourly) : defaultHourly;
     } else {
       const m = customMonthly ? parseFloat(customMonthly) : defaultMonthly;
-      // Use user's actual schedule to derive hourly rate
-      hourly = m / effectiveTotalHours;
+      // ALWAYS divide by user's actual total hours (not country standard)
+      hourly = m / userTotalHours;
     }
 
-    if (!hourly || hourly <= 0) return null;
+    if (!hourly || hourly <= 0 || !isFinite(hourly)) return null;
 
-    const daily = hourly * effectiveHpd;
-    const weekly = daily * Math.min(effectiveDays / weeksPerMonth, 7);
-    const monthly = hourly * effectiveTotalHours;
+    // All breakdowns use user's schedule
+    const daily = hourly * userHpd;
+    const weekly = daily * daysPerWeek;
+    const monthly = hourly * userTotalHours;
     const annual = monthly * country.minimumWage.annualPayments;
     const totalDeductions = country.taxes.averageEffectiveRate + country.taxes.socialContributions;
 
-    // Custom calc card (shown when user entered hours/day or days)
-    const hasCustomInput = inputDailyHours !== null || inputDays !== null;
-    let customCalc = null;
+    // Overtime detection (based on country legal standard)
+    const regularHrs = Math.min(userTotalHours, standardMonthlyHours);
+    const overtimeHrs = Math.max(0, userTotalHours - standardMonthlyHours);
 
-    if (hasCustomInput) {
-      const regularHrs = Math.min(effectiveTotalHours, standardMonthlyHours);
-      const overtimeHrs = Math.max(0, effectiveTotalHours - standardMonthlyHours);
-
-      // In month mode, the entered salary IS the total — no overtime split
-      let regularPay: number, overtimePay: number, gross: number;
-      if (inputMode === "month" && (customMonthly || defaultMonthly)) {
-        gross = customMonthly ? parseFloat(customMonthly) : defaultMonthly;
-        regularPay = gross;
-        overtimePay = 0;
-      } else {
-        regularPay = regularHrs * hourly;
-        overtimePay = overtimeHrs * hourly * 1.5;
-        gross = regularPay + overtimePay;
-      }
-
-      customCalc = {
-        hoursPerDay: effectiveHpd,
-        days: effectiveDays,
-        totalHours: Math.round(effectiveTotalHours * 10) / 10,
-        regularHours: Math.round(regularHrs * 10) / 10,
-        overtimeHours: Math.round(overtimeHrs * 10) / 10,
-        regularPay,
-        overtimePay,
-        gross,
-        net: gross * (1 - totalDeductions),
-        dailyGross: daily,
-        hourlyRate: hourly,
-      };
+    let overtimePay = 0;
+    let grossWithOvertime = monthly;
+    if (inputMode === "hour" && overtimeHrs > 0) {
+      // In hour mode: overtime is paid at 150%
+      const regularPay = regularHrs * hourly;
+      overtimePay = overtimeHrs * hourly * 1.5;
+      grossWithOvertime = regularPay + overtimePay;
     }
 
-    return { hourly, daily, weekly, monthly, annual, totalDeductions, customCalc };
-  }, [inputMode, customHourly, customMonthly, defaultHourly, defaultMonthly, country, inputDailyHours, inputDays, standardMonthlyHours, standardMonthlyDays, defaultHoursPerDay, weeksPerMonth]);
+    return {
+      hourly,
+      daily,
+      weekly,
+      monthly,
+      annual,
+      totalDeductions,
+      userHpd,
+      userDays,
+      userTotalHours: Math.round(userTotalHours * 10) / 10,
+      regularHours: Math.round(regularHrs * 10) / 10,
+      overtimeHours: Math.round(overtimeHrs * 10) / 10,
+      overtimePay,
+      grossWithOvertime,
+      hasCustomSchedule,
+    };
+  }, [inputMode, customHourly, customMonthly, defaultHourly, defaultMonthly, country, inputDailyHours, inputDays, standardMonthlyHours, standardMonthlyDays, defaultHoursPerDay, daysPerWeek, weeksPerMonth]);
 
   const fmt = (v: number) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const fmtLocal = (v: number) => {
@@ -214,39 +209,37 @@ export default function SalaryCalculator({ country }: Props) {
             ))}
           </div>
 
-          {/* Custom calculation result */}
-          {calc.customCalc && (
+          {/* Schedule details */}
+          {calc.hasCustomSchedule && (
             <div className="bg-gradient-to-r from-cyan-500/[0.08] to-transparent border border-cyan-400/20 rounded-2xl p-5">
               <p className="text-xs text-cyan-300/70 uppercase tracking-wider mb-3 font-medium">
-                {t.results} — {calc.customCalc.hoursPerDay}h/{t.days.slice(0, 3)} x {calc.customCalc.days} {t.days} = {calc.customCalc.totalHours}h
-                {calc.customCalc.hourlyRate && <> ({fmt(calc.customCalc.hourlyRate)} €/{t.hour})</>}
+                {t.results} — {calc.userHpd}h/{t.days.slice(0, 3)} x {calc.userDays} {t.days} = {calc.userTotalHours}h ({fmt(calc.hourly)} €/{t.hour})
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                 <div>
                   <p className="text-[10px] text-white/40 uppercase">{t.regularHours}</p>
-                  <p className="text-lg font-bold text-white font-mono">{calc.customCalc.regularHours}h</p>
-                  <p className="text-xs text-white/40 font-mono">{fmt(calc.customCalc.regularPay)} €</p>
+                  <p className="text-lg font-bold text-white font-mono">{calc.regularHours}h</p>
                 </div>
-                {calc.customCalc.overtimeHours > 0 && (
+                {calc.overtimeHours > 0 && (
                   <div>
                     <p className="text-[10px] text-white/40 uppercase">{t.overtimeHours}</p>
-                    <p className="text-lg font-bold text-orange-300 font-mono">{calc.customCalc.overtimeHours}h</p>
-                    <p className="text-xs text-orange-300/60 font-mono">{fmt(calc.customCalc.overtimePay)} € (150%)</p>
+                    <p className="text-lg font-bold text-orange-300 font-mono">{calc.overtimeHours}h</p>
+                    {calc.overtimePay > 0 && <p className="text-xs text-orange-300/60 font-mono">{fmt(calc.overtimePay)} € (150%)</p>}
                   </div>
                 )}
                 <div>
                   <p className="text-[10px] text-white/40 uppercase">{t.perDay}</p>
-                  <p className="text-lg font-bold text-white font-mono">{fmt(calc.customCalc.dailyGross)} €</p>
+                  <p className="text-lg font-bold text-white font-mono">{fmt(calc.daily)} €</p>
                 </div>
                 <div>
                   <p className="text-[10px] text-white/40 uppercase">{t.grossEarned}</p>
-                  <p className="text-lg font-bold text-cyan-300 font-mono">{fmt(calc.customCalc.gross)} €</p>
-                  {fmtLocal(calc.customCalc.gross) && <p className="text-xs text-cyan-300/50 font-mono">{fmtLocal(calc.customCalc.gross)}</p>}
+                  <p className="text-lg font-bold text-cyan-300 font-mono">{fmt(calc.grossWithOvertime)} €</p>
+                  {fmtLocal(calc.grossWithOvertime) && <p className="text-xs text-cyan-300/50 font-mono">{fmtLocal(calc.grossWithOvertime)}</p>}
                 </div>
                 {showNet && (
                   <div>
                     <p className="text-[10px] text-white/40 uppercase">{t.netEstimate}</p>
-                    <p className="text-lg font-bold text-green-300 font-mono">{fmt(calc.customCalc.net)} €</p>
+                    <p className="text-lg font-bold text-green-300 font-mono">{fmt(calc.grossWithOvertime * (1 - calc.totalDeductions))} €</p>
                   </div>
                 )}
               </div>
