@@ -142,24 +142,24 @@ export default function Home() {
         <AnimatePresence mode="wait">
           {selectedCountry && (
             <motion.div key={selectedCountry.code} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }} className="space-y-6">
-              <div className="bg-gradient-to-r from-blue-500/[0.08] via-transparent to-amber-500/[0.06] border border-white/[0.06] rounded-2xl p-6">
-                <div className="flex flex-wrap items-center gap-4 mb-4">
-                  <span className="text-5xl">{selectedCountry.flag}</span>
-                  <div>
-                    <h2 className="text-2xl font-bold text-white">{selectedCountry.name}</h2>
-                    <p className="text-sm text-white/40">{selectedCountry.nameLocal}</p>
+              <div className="bg-gradient-to-r from-blue-500/[0.08] via-transparent to-amber-500/[0.06] border border-white/[0.06] rounded-2xl p-4 sm:p-6">
+                <div className="flex items-start gap-3 sm:gap-4 mb-4">
+                  <span className="text-4xl sm:text-5xl shrink-0">{selectedCountry.flag}</span>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-xl sm:text-2xl font-bold text-white truncate">{selectedCountry.name}</h2>
+                    <p className="text-xs sm:text-sm text-white/40">{selectedCountry.nameLocal}</p>
                   </div>
                   {selectedCountry.hasStatutoryMinimumWage && (
-                    <div className="ml-auto text-right">
-                      <p className="text-3xl font-bold text-blue-400 font-mono">
+                    <div className="text-right shrink-0">
+                      <p className="text-xl sm:text-3xl font-bold text-blue-400 font-mono">
                         {selectedCountry.minimumWage.grossMonthly.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
                       </p>
-                      <p className="text-xs text-white/30">
+                      <p className="text-[10px] sm:text-xs text-white/30">
                         {t.grossMonthly}
-                        {selectedCountry.minimumWage.definedPer === "hour" && selectedCountry.minimumWage.hourlyRate && (<> ({selectedCountry.minimumWage.hourlyRate} €/h — {t.definedPerHour})</>)}
+                        {selectedCountry.minimumWage.definedPer === "hour" && selectedCountry.minimumWage.hourlyRate && (<> ({selectedCountry.minimumWage.hourlyRate} €/h)</>)}
                       </p>
                       {selectedCountry.minimumWage.grossMonthlyLocal && (
-                        <p className="text-sm text-white/40 font-mono">{selectedCountry.minimumWage.grossMonthlyLocal.toLocaleString("pt-BR")} {selectedCountry.currencySymbol}</p>
+                        <p className="text-xs sm:text-sm text-white/40 font-mono">{selectedCountry.minimumWage.grossMonthlyLocal.toLocaleString("pt-BR")} {selectedCountry.currencySymbol}</p>
                       )}
                     </div>
                   )}
@@ -183,11 +183,11 @@ export default function Home() {
                 )}
               </div>
 
-              <div className="flex gap-1 bg-white/[0.03] p-1 rounded-xl overflow-x-auto">
+              <div className="flex gap-1 bg-white/[0.03] p-1 rounded-xl overflow-x-auto scrollbar-none">
                 {tabs.map((tab) => (
                   <button key={tab.id} onClick={() => { setActiveTab(tab.id); handleTabCalc(tab.id); }}
-                    className={`flex-1 min-w-[100px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${activeTab === tab.id ? "bg-blue-500/15 text-blue-300 shadow-lg shadow-blue-500/5" : "text-white/40 hover:text-white/60 hover:bg-white/[0.04]"}`}>
-                    <span className="mr-1.5">{tab.icon}</span>{tab.label}
+                    className={`flex-1 min-w-0 px-2 sm:px-4 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${activeTab === tab.id ? "bg-blue-500/15 text-blue-300 shadow-lg shadow-blue-500/5" : "text-white/40 hover:text-white/60 hover:bg-white/[0.04]"}`}>
+                    <span className="mr-1 sm:mr-1.5">{tab.icon}</span><span className="hidden sm:inline">{tab.label}</span>
                   </button>
                 ))}
               </div>
@@ -232,10 +232,24 @@ export default function Home() {
 
       <AnimatePresence>
         {showCalculator && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={() => setShowCalculator(false)}>
-            <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }} onClick={(e) => e.stopPropagation()} className="relative max-h-[90vh] overflow-auto rounded-2xl">
-              <button onClick={() => setShowCalculator(false)} className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/50 border border-white/20 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/70 transition-colors">&times;</button>
-              <Calculator />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowCalculator(false)}>
+            <motion.div
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full sm:w-auto max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-y-auto overscroll-contain rounded-t-2xl sm:rounded-2xl bg-[#0c0a07] sm:m-4"
+            >
+              {/* Close bar (mobile drag indicator + close button) */}
+              <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-2 bg-[#0c0a07]/95 backdrop-blur-sm border-b border-white/5">
+                <div className="w-10 h-1 rounded-full bg-white/20 sm:hidden mx-auto absolute left-1/2 -translate-x-1/2 top-2" />
+                <span className="text-xs text-white/30 font-medium">{t.calculator}</span>
+                <button onClick={() => setShowCalculator(false)} className="w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-colors text-sm">&times;</button>
+              </div>
+              <div className="p-3 sm:p-4">
+                <Calculator />
+              </div>
             </motion.div>
           </motion.div>
         )}

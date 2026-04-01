@@ -192,20 +192,22 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
   return (
     <div className="space-y-4">
       {/* Year selector + Day off picker */}
-      <div className="flex flex-wrap items-center gap-4">
-        <div className="flex items-center gap-2">
-          <button onClick={() => setYear(year - 1)} className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-white/70 hover:bg-white/10 transition-colors">&larr;</button>
-          <span className="text-lg font-bold text-white font-mono min-w-[4ch] text-center">{year}</span>
-          <button onClick={() => setYear(year + 1)} className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-white/70 hover:bg-white/10 transition-colors">&rarr;</button>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <button onClick={() => setYear(year - 1)} className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-white/70 hover:bg-white/10 transition-colors">&larr;</button>
+            <span className="text-lg font-bold text-white font-mono min-w-[4ch] text-center">{year}</span>
+            <button onClick={() => setYear(year + 1)} className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-white/70 hover:bg-white/10 transition-colors">&rarr;</button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-1.5 ml-auto">
-          <span className="text-xs text-white/40 mr-1">{t.daysOff}</span>
+        <div className="flex items-center gap-1 sm:gap-1.5">
+          <span className="text-xs text-white/40 mr-1 shrink-0">{t.daysOff}</span>
           {t.dayNames.map((name, euIdx) => (
             <button
               key={euIdx}
               onClick={() => toggleDayOff(euIdx)}
-              className={`w-8 h-8 rounded-lg text-[10px] font-medium transition-all ${daysOff.has(euIdx) ? "bg-purple-500/30 text-purple-200 border border-purple-400/40" : "bg-white/5 text-white/40 border border-white/10 hover:bg-white/10"}`}
+              className={`flex-1 min-w-0 h-8 rounded-lg text-[9px] sm:text-[10px] font-medium transition-all ${daysOff.has(euIdx) ? "bg-purple-500/30 text-purple-200 border border-purple-400/40" : "bg-white/5 text-white/40 border border-white/10 hover:bg-white/10"}`}
             >
               {name}
             </button>
@@ -249,7 +251,7 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
           </div>
 
           {/* Legend */}
-          <div className="flex flex-wrap gap-4 text-xs text-white/50">
+          <div className="flex flex-wrap gap-x-4 gap-y-2 text-[10px] sm:text-xs text-white/50">
             <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-cyan-500/40 border border-cyan-400/50" /> {t.legendHolidayWorkday}</span>
             <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-red-500/30 border border-red-400/40" /> {t.legendHolidayDayOff}</span>
             <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-purple-500/25 border border-purple-400/30" /> {t.legendDayOff}</span>
@@ -257,7 +259,7 @@ export default function HolidaysPanel({ country }: HolidaysPanelProps) {
           </div>
 
           {/* Calendar grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
             {calendarMonths.map(({ month, cells }) => (
               <div key={month} className="bg-white/[0.03] border border-white/10 rounded-xl p-3">
                 <p className="text-sm font-bold text-white/80 mb-2 text-center">{t.months[month]}</p>

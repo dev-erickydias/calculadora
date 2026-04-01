@@ -309,14 +309,14 @@ interface ButtonDef {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  num: "bg-[#252019] text-[#d0c8b0] text-lg h-[52px]",
-  op: "bg-[#2a1a08] text-[#d4a040] text-xl h-[52px] font-semibold",
-  sci: "bg-[#142220] text-[#50a888] text-[11px] h-[38px] tracking-wide",
-  mem: "bg-[#1a1814] text-[#7a6a4a] text-[11px] h-[38px] tracking-wide",
-  fn: "bg-[#201c16] text-[#b0a890] text-base h-[52px]",
-  eq: "bg-gradient-to-b from-[#d4a843] to-[#b8922a] text-[#0c0a07] text-xl h-[52px] font-bold",
-  clear: "bg-[#2a1515] text-[#d05050] text-sm h-[52px] font-semibold",
-  mode: "bg-[#142220] text-[#50a888] text-[11px] h-[38px] border border-[#1e3a30] font-semibold",
+  num: "bg-[#252019] text-[#d0c8b0] text-base sm:text-lg h-[44px] sm:h-[52px]",
+  op: "bg-[#2a1a08] text-[#d4a040] text-lg sm:text-xl h-[44px] sm:h-[52px] font-semibold",
+  sci: "bg-[#142220] text-[#50a888] text-[10px] sm:text-[11px] h-[34px] sm:h-[38px] tracking-wide",
+  mem: "bg-[#1a1814] text-[#7a6a4a] text-[10px] sm:text-[11px] h-[34px] sm:h-[38px] tracking-wide",
+  fn: "bg-[#201c16] text-[#b0a890] text-sm sm:text-base h-[44px] sm:h-[52px]",
+  eq: "bg-gradient-to-b from-[#d4a843] to-[#b8922a] text-[#0c0a07] text-lg sm:text-xl h-[44px] sm:h-[52px] font-bold",
+  clear: "bg-[#2a1515] text-[#d05050] text-xs sm:text-sm h-[44px] sm:h-[52px] font-semibold",
+  mode: "bg-[#142220] text-[#50a888] text-[10px] sm:text-[11px] h-[34px] sm:h-[38px] border border-[#1e3a30] font-semibold",
 };
 
 function CalcButton({ label, display, action, variant, span }: ButtonDef) {
@@ -574,7 +574,7 @@ export default function Calculator() {
 
   // ===== RENDER =====
   return (
-    <div className="relative w-full max-w-[520px] mx-auto">
+    <div className="relative w-full max-w-[520px] mx-auto text-[15px] sm:text-base">
       {/* ===== CALCULATOR BODY ===== */}
       <div className="bg-gradient-to-b from-[#171412] to-[#131110] rounded-2xl border border-[#2a2520]/60 shadow-[0_8px_40px_rgba(0,0,0,0.5),0_2px_8px_rgba(0,0,0,0.3)] overflow-hidden">
         {/* --- Header Bar --- */}
@@ -607,7 +607,7 @@ export default function Calculator() {
             </div>
             {/* Result line */}
             <div
-              className="vfd-glow text-[#e8c55a] text-right text-[2.5rem] font-mono font-light truncate leading-tight"
+              className="vfd-glow text-[#e8c55a] text-right text-[1.75rem] sm:text-[2.5rem] font-mono font-light truncate leading-tight"
               style={{ fontFamily: "var(--font-jetbrains)" }}
             >
               {displayValue}
@@ -616,9 +616,9 @@ export default function Calculator() {
         </div>
 
         {/* --- Scientific Buttons Panel --- */}
-        <div className="mx-3 mb-2">
-          <div className="bg-[#0f1614]/60 rounded-lg p-1.5 border border-[#1e2a25]/40">
-            <div className="grid grid-cols-6 gap-[3px]">
+        <div className="mx-2 sm:mx-3 mb-2">
+          <div className="bg-[#0f1614]/60 rounded-lg p-1 sm:p-1.5 border border-[#1e2a25]/40">
+            <div className="grid grid-cols-6 gap-[2px] sm:gap-[3px]">
               {sciButtons.map((btn, i) => (
                 <CalcButton key={`sci-${i}`} {...btn} />
               ))}
@@ -632,8 +632,8 @@ export default function Calculator() {
         </div>
 
         {/* --- Main Buttons --- */}
-        <div className="px-3 pb-4">
-          <div className="grid grid-cols-4 gap-[5px]">
+        <div className="px-2 sm:px-3 pb-3 sm:pb-4">
+          <div className="grid grid-cols-4 gap-[3px] sm:gap-[5px]">
             {mainButtons.map((btn, i) => (
               <CalcButton key={`main-${i}`} {...btn} />
             ))}
