@@ -40,6 +40,16 @@ export interface Translation {
   month: string;
   effectiveDate: string;
   source: string;
+  hoursWorked: string;
+  daysWorkedMonth: string;
+  customHoursPerWeek: string;
+  customDaysPerWeek: string;
+  totalHoursMonth: string;
+  totalDaysMonth: string;
+  grossEarned: string;
+  overtimeHours: string;
+  regularHours: string;
+  results: string;
   noMinWageTitle: string;
   noMinWageDesc: string;
   enterSalary: string;
@@ -133,6 +143,16 @@ const en: Translation = {
   month: "month",
   effectiveDate: "Effective",
   source: "Source",
+  hoursWorked: "Hours worked (this month)",
+  daysWorkedMonth: "Days worked (this month)",
+  customHoursPerWeek: "Hours/week",
+  customDaysPerWeek: "Days/week",
+  totalHoursMonth: "Total hours this month",
+  totalDaysMonth: "Total days this month",
+  grossEarned: "Gross earned",
+  overtimeHours: "Overtime hours",
+  regularHours: "Regular hours",
+  results: "Results",
   noMinWageTitle: "does not have a statutory minimum wage",
   noMinWageDesc: "Enter a value below to calculate:",
   enterSalary: "Gross monthly salary in €",
@@ -219,6 +239,16 @@ const pt: Translation = {
   month: "mês",
   effectiveDate: "Vigência",
   source: "Fonte",
+  hoursWorked: "Horas trabalhadas (este mês)",
+  daysWorkedMonth: "Dias trabalhados (este mês)",
+  customHoursPerWeek: "Horas/semana",
+  customDaysPerWeek: "Dias/semana",
+  totalHoursMonth: "Total de horas no mês",
+  totalDaysMonth: "Total de dias no mês",
+  grossEarned: "Bruto ganho",
+  overtimeHours: "Horas extra",
+  regularHours: "Horas normais",
+  results: "Resultados",
   noMinWageTitle: "não possui salário mínimo estatutário",
   noMinWageDesc: "Insira um valor abaixo para calcular:",
   enterSalary: "Salário mensal bruto em €",
