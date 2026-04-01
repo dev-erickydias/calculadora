@@ -10,15 +10,15 @@ interface Props { country: CountryData; }
 export default function SalaryCalculator({ country }: Props) {
   const { t } = useTranslation();
   const [customHourly, setCustomHourly] = useState<string>("");
-  const [hoursWorked, setHoursWorked] = useState<string>("");
+  const [dailyHours, setDailyHours] = useState<string>("");
   const [daysWorked, setDaysWorked] = useState<string>("");
   const [showNet, setShowNet] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem(`hourly_${country.code}`);
     if (saved) setCustomHourly(saved); else setCustomHourly("");
-    const savedH = localStorage.getItem(`hours_${country.code}`);
-    if (savedH) setHoursWorked(savedH); else setHoursWorked("");
+    const savedH = localStorage.getItem(`dailyHours_${country.code}`);
+    if (savedH) setDailyHours(savedH); else setDailyHours("");
     const savedD = localStorage.getItem(`days_${country.code}`);
     if (savedD) setDaysWorked(savedD); else setDaysWorked("");
   }, [country.code]);
@@ -26,75 +26,68 @@ export default function SalaryCalculator({ country }: Props) {
   useEffect(() => {
     if (customHourly) localStorage.setItem(`hourly_${country.code}`, customHourly);
     else localStorage.removeItem(`hourly_${country.code}`);
-    if (hoursWorked) localStorage.setItem(`hours_${country.code}`, hoursWorked);
-    else localStorage.removeItem(`hours_${country.code}`);
+    if (dailyHours) localStorage.setItem(`dailyHours_${country.code}`, dailyHours);
+    else localStorage.removeItem(`dailyHours_${country.code}`);
     if (daysWorked) localStorage.setItem(`days_${country.code}`, daysWorked);
     else localStorage.removeItem(`days_${country.code}`);
-  }, [customHourly, hoursWorked, daysWorked, country.code]);
+  }, [customHourly, dailyHours, daysWorked, country.code]);
 
   const { standardHours, daysPerWeek } = country.workWeek;
   const weeksPerMonth = 4.33;
-  const standardMonthlyHours = Math.round(standardHours * weeksPerMonth);
+  const defaultHoursPerDay = standardHours / daysPerWeek;
   const standardMonthlyDays = Math.round(daysPerWeek * weeksPerMonth);
-  const hoursPerDay = standardHours / daysPerWeek;
+  const standardMonthlyHours = Math.round(standardHours * weeksPerMonth);
 
-  // Default hourly rate from country data
   const defaultHourly = country.minimumWage.hourlyRate
     ? country.minimumWage.hourlyRate
     : country.minimumWage.grossMonthly / (standardHours * weeksPerMonth);
 
   const baseHourly = customHourly ? parseFloat(customHourly) : defaultHourly;
-  const inputHours = hoursWorked ? parseFloat(hoursWorked) : null;
+  const inputDailyHours = dailyHours ? parseFloat(dailyHours) : null;
   const inputDays = daysWorked ? parseFloat(daysWorked) : null;
 
   const calc = useMemo(() => {
     if (!baseHourly || baseHourly <= 0) return null;
 
     const hourly = baseHourly;
-    const daily = hourly * hoursPerDay;
+    const daily = hourly * defaultHoursPerDay;
     const weekly = hourly * standardHours;
     const monthly = hourly * standardHours * weeksPerMonth;
     const annual = monthly * country.minimumWage.annualPayments;
     const totalDeductions = country.taxes.averageEffectiveRate + country.taxes.socialContributions;
 
-    // Hours worked calculation
-    let hoursCalc = null;
-    if (inputHours !== null && inputHours > 0) {
-      const regularHrs = Math.min(inputHours, standardMonthlyHours);
-      const overtimeHrs = Math.max(0, inputHours - standardMonthlyHours);
+    // Custom calculation when user fills hours/day and/or days
+    let customCalc = null;
+    const hpd = inputDailyHours !== null && inputDailyHours > 0 ? inputDailyHours : null;
+    const days = inputDays !== null && inputDays > 0 ? inputDays : null;
+
+    if (hpd !== null || days !== null) {
+      const effectiveHpd = hpd ?? defaultHoursPerDay;
+      const effectiveDays = days ?? standardMonthlyDays;
+      const totalHours = effectiveHpd * effectiveDays;
+      const regularHrs = Math.min(totalHours, standardMonthlyHours);
+      const overtimeHrs = Math.max(0, totalHours - standardMonthlyHours);
       const regularPay = regularHrs * hourly;
       const overtimePay = overtimeHrs * hourly * 1.5;
-      hoursCalc = {
-        totalHours: inputHours,
+      const gross = regularPay + overtimePay;
+
+      customCalc = {
+        hoursPerDay: effectiveHpd,
+        days: effectiveDays,
+        totalHours: Math.round(totalHours * 10) / 10,
         regularHours: Math.round(regularHrs * 10) / 10,
         overtimeHours: Math.round(overtimeHrs * 10) / 10,
         regularPay,
         overtimePay,
-        grossTotal: regularPay + overtimePay,
-        netTotal: (regularPay + overtimePay) * (1 - totalDeductions),
+        gross,
+        net: gross * (1 - totalDeductions),
+        dailyGross: effectiveHpd * hourly,
+        weeklyGross: effectiveHpd * hourly * Math.min(effectiveDays, daysPerWeek),
       };
     }
 
-    // Days worked calculation
-    let daysCalc = null;
-    if (inputDays !== null && inputDays > 0) {
-      const totalHoursFromDays = inputDays * hoursPerDay;
-      const regularHrs = Math.min(totalHoursFromDays, standardMonthlyHours);
-      const overtimeHrs = Math.max(0, totalHoursFromDays - standardMonthlyHours);
-      const regularPay = regularHrs * hourly;
-      const overtimePay = overtimeHrs * hourly * 1.5;
-      daysCalc = {
-        totalDays: inputDays,
-        totalHours: Math.round(totalHoursFromDays * 10) / 10,
-        regularHours: Math.round(regularHrs * 10) / 10,
-        overtimeHours: Math.round(overtimeHrs * 10) / 10,
-        grossTotal: regularPay + overtimePay,
-        netTotal: (regularPay + overtimePay) * (1 - totalDeductions),
-      };
-    }
-
-    return { hourly, daily, weekly, monthly, annual, totalDeductions, hoursCalc, daysCalc };
-  }, [baseHourly, country, inputHours, inputDays, standardHours, standardMonthlyHours, hoursPerDay, weeksPerMonth]);
+    return { hourly, daily, weekly, monthly, annual, totalDeductions, customCalc };
+  }, [baseHourly, country, inputDailyHours, inputDays, standardHours, standardMonthlyHours, standardMonthlyDays, defaultHoursPerDay, weeksPerMonth, daysPerWeek]);
 
   const fmt = (v: number) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const fmtLocal = (v: number) => {
@@ -126,10 +119,10 @@ export default function SalaryCalculator({ country }: Props) {
           <p className="text-xs text-white/30 mt-1">{t.minimum}: {fmt(defaultHourly)} €/{t.hour}</p>
         </div>
         <div>
-          <label className="block text-sm text-white/60 mb-1">{t.hoursWorked}</label>
-          <input type="number" min="0" step="0.5" placeholder={standardMonthlyHours.toString()} value={hoursWorked} onChange={(e) => setHoursWorked(e.target.value)}
+          <label className="block text-sm text-white/60 mb-1">{t.hoursPerDay}</label>
+          <input type="number" min="0" step="0.5" placeholder={defaultHoursPerDay.toString()} value={dailyHours} onChange={(e) => setDailyHours(e.target.value)}
             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-blue-400/50 focus:ring-1 focus:ring-blue-400/30 font-mono" />
-          <p className="text-xs text-white/30 mt-1">{standardHours}h/{t.week} = ~{standardMonthlyHours}h/{t.month}</p>
+          <p className="text-xs text-white/30 mt-1">{standardHours}h/{t.week} = {defaultHoursPerDay}h/{t.days.slice(0, 3)}</p>
         </div>
         <div>
           <label className="block text-sm text-white/60 mb-1">{t.daysWorkedMonth}</label>
@@ -165,58 +158,38 @@ export default function SalaryCalculator({ country }: Props) {
             ))}
           </div>
 
-          {/* Hours result */}
-          {calc.hoursCalc && (
+          {/* Custom calculation result */}
+          {calc.customCalc && (
             <div className="bg-gradient-to-r from-cyan-500/[0.08] to-transparent border border-cyan-400/20 rounded-2xl p-5">
-              <p className="text-xs text-cyan-300/70 uppercase tracking-wider mb-3 font-medium">{t.results} — {calc.hoursCalc.totalHours}h</p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <p className="text-xs text-cyan-300/70 uppercase tracking-wider mb-3 font-medium">
+                {t.results} — {calc.customCalc.hoursPerDay}h/{t.days.slice(0, 3)} x {calc.customCalc.days} {t.days} = {calc.customCalc.totalHours}h
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                 <div>
                   <p className="text-[10px] text-white/40 uppercase">{t.regularHours}</p>
-                  <p className="text-lg font-bold text-white font-mono">{calc.hoursCalc.regularHours}h</p>
-                  <p className="text-xs text-white/40 font-mono">{fmt(calc.hoursCalc.regularPay)} €</p>
+                  <p className="text-lg font-bold text-white font-mono">{calc.customCalc.regularHours}h</p>
+                  <p className="text-xs text-white/40 font-mono">{fmt(calc.customCalc.regularPay)} €</p>
                 </div>
-                <div>
-                  <p className="text-[10px] text-white/40 uppercase">{t.overtimeHours}</p>
-                  <p className="text-lg font-bold text-orange-300 font-mono">{calc.hoursCalc.overtimeHours}h</p>
-                  <p className="text-xs text-orange-300/60 font-mono">{fmt(calc.hoursCalc.overtimePay)} € (150%)</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-white/40 uppercase">{t.grossEarned}</p>
-                  <p className="text-lg font-bold text-cyan-300 font-mono">{fmt(calc.hoursCalc.grossTotal)} €</p>
-                  {fmtLocal(calc.hoursCalc.grossTotal) && <p className="text-xs text-cyan-300/50 font-mono">{fmtLocal(calc.hoursCalc.grossTotal)}</p>}
-                </div>
-                {showNet && (
+                {calc.customCalc.overtimeHours > 0 && (
                   <div>
-                    <p className="text-[10px] text-white/40 uppercase">{t.netEstimate}</p>
-                    <p className="text-lg font-bold text-green-300 font-mono">{fmt(calc.hoursCalc.netTotal)} €</p>
+                    <p className="text-[10px] text-white/40 uppercase">{t.overtimeHours}</p>
+                    <p className="text-lg font-bold text-orange-300 font-mono">{calc.customCalc.overtimeHours}h</p>
+                    <p className="text-xs text-orange-300/60 font-mono">{fmt(calc.customCalc.overtimePay)} € (150%)</p>
                   </div>
                 )}
-              </div>
-            </div>
-          )}
-
-          {/* Days result */}
-          {calc.daysCalc && (
-            <div className="bg-gradient-to-r from-amber-500/[0.08] to-transparent border border-amber-400/20 rounded-2xl p-5">
-              <p className="text-xs text-amber-300/70 uppercase tracking-wider mb-3 font-medium">{t.results} — {calc.daysCalc.totalDays} {t.days} ({calc.daysCalc.totalHours}h)</p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
-                  <p className="text-[10px] text-white/40 uppercase">{t.regularHours}</p>
-                  <p className="text-lg font-bold text-white font-mono">{calc.daysCalc.regularHours}h</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-white/40 uppercase">{t.overtimeHours}</p>
-                  <p className="text-lg font-bold text-orange-300 font-mono">{calc.daysCalc.overtimeHours}h</p>
+                  <p className="text-[10px] text-white/40 uppercase">{t.perDay}</p>
+                  <p className="text-lg font-bold text-white font-mono">{fmt(calc.customCalc.dailyGross)} €</p>
                 </div>
                 <div>
                   <p className="text-[10px] text-white/40 uppercase">{t.grossEarned}</p>
-                  <p className="text-lg font-bold text-amber-300 font-mono">{fmt(calc.daysCalc.grossTotal)} €</p>
-                  {fmtLocal(calc.daysCalc.grossTotal) && <p className="text-xs text-amber-300/50 font-mono">{fmtLocal(calc.daysCalc.grossTotal)}</p>}
+                  <p className="text-lg font-bold text-cyan-300 font-mono">{fmt(calc.customCalc.gross)} €</p>
+                  {fmtLocal(calc.customCalc.gross) && <p className="text-xs text-cyan-300/50 font-mono">{fmtLocal(calc.customCalc.gross)}</p>}
                 </div>
                 {showNet && (
                   <div>
                     <p className="text-[10px] text-white/40 uppercase">{t.netEstimate}</p>
-                    <p className="text-lg font-bold text-green-300 font-mono">{fmt(calc.daysCalc.netTotal)} €</p>
+                    <p className="text-lg font-bold text-green-300 font-mono">{fmt(calc.customCalc.net)} €</p>
                   </div>
                 )}
               </div>

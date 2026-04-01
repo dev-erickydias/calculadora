@@ -40,7 +40,7 @@ export interface Translation {
   month: string;
   effectiveDate: string;
   source: string;
-  hoursWorked: string;
+  hoursPerDay: string;
   daysWorkedMonth: string;
   customHoursPerWeek: string;
   customDaysPerWeek: string;
@@ -143,7 +143,7 @@ const en: Translation = {
   month: "month",
   effectiveDate: "Effective",
   source: "Source",
-  hoursWorked: "Hours worked (this month)",
+  hoursPerDay: "Hours per day",
   daysWorkedMonth: "Days worked (this month)",
   customHoursPerWeek: "Hours/week",
   customDaysPerWeek: "Days/week",
@@ -239,7 +239,7 @@ const pt: Translation = {
   month: "mês",
   effectiveDate: "Vigência",
   source: "Fonte",
-  hoursWorked: "Horas trabalhadas (este mês)",
+  hoursPerDay: "Horas por dia",
   daysWorkedMonth: "Dias trabalhados (este mês)",
   customHoursPerWeek: "Horas/semana",
   customDaysPerWeek: "Dias/semana",
