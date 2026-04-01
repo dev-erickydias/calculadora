@@ -574,7 +574,7 @@ export default function Calculator() {
 
   // ===== RENDER =====
   return (
-    <div className="relative w-full max-w-[520px] mx-auto text-[15px] sm:text-base">
+    <div className="relative w-full max-w-[580px] mx-auto text-[15px] sm:text-base">
       <div className="bg-gradient-to-b from-[#0d1425] to-[#0a0f1e] rounded-2xl border border-white/[0.06] shadow-[0_8px_40px_rgba(0,0,0,0.5),0_0_60px_rgba(37,99,235,0.05)] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-2.5 border-b border-white/[0.06]">

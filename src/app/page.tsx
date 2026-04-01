@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CountryData, getCountryByCode } from "@/data/countries";
 import { langList } from "@/data/translations";
@@ -21,8 +21,44 @@ export default function Home() {
   const [selectedCountry, setSelectedCountry] = useState<CountryData | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>("salario");
   const [showCalculator, setShowCalculator] = useState(false);
+  const [calcMinimized, setCalcMinimized] = useState(false);
   const [showLangPicker, setShowLangPicker] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [calcPos, setCalcPos] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
+  const calcWindowRef = useRef<HTMLDivElement>(null);
+
+  const handleDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+    dragRef.current = { startX: clientX, startY: clientY, origX: calcPos.x, origY: calcPos.y };
+    setDragging(true);
+  }, [calcPos]);
+
+  useEffect(() => {
+    if (!dragging) return;
+    const onMove = (e: MouseEvent | TouchEvent) => {
+      if (!dragRef.current) return;
+      const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+      const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+      setCalcPos({
+        x: dragRef.current.origX + (clientX - dragRef.current.startX),
+        y: dragRef.current.origY + (clientY - dragRef.current.startY),
+      });
+    };
+    const onEnd = () => { setDragging(false); dragRef.current = null; };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onEnd);
+    window.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("touchend", onEnd);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onEnd);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onEnd);
+    };
+  }, [dragging]);
 
   const tabs: { id: Tab; label: string; icon: string }[] = [
     { id: "salario", label: t.tabSalary, icon: "💰" },
@@ -255,25 +291,51 @@ export default function Home() {
 
       <AnimatePresence>
         {showCalculator && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowCalculator(false)}>
-            <motion.div
-              initial={{ opacity: 0, y: 100 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 100 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full sm:w-auto max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-y-auto overscroll-contain rounded-t-2xl sm:rounded-2xl bg-[#0a0f1e] sm:m-4"
-            >
-              {/* Close bar (mobile drag indicator + close button) */}
-              <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-2 bg-[#0a0f1e]/95 backdrop-blur-sm border-b border-white/5">
-                <div className="w-10 h-1 rounded-full bg-white/20 sm:hidden mx-auto absolute left-1/2 -translate-x-1/2 top-2" />
-                <span className="text-xs text-white/30 font-medium">{t.calculator}</span>
-                <button onClick={() => setShowCalculator(false)} className="w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-colors text-sm">&times;</button>
+          <motion.div
+            ref={calcWindowRef}
+            initial={{ opacity: 0, scale: 0.8, y: 40 }}
+            animate={calcMinimized
+              ? { opacity: 1, scale: 1, y: 0, height: "auto", width: "auto" }
+              : { opacity: 1, scale: 1, y: 0 }
+            }
+            exit={{ opacity: 0, scale: 0.8, y: 40 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            style={{ transform: `translate(${calcPos.x}px, ${calcPos.y}px)` }}
+            className={`fixed z-[200] ${calcMinimized ? "bottom-4 right-4" : "bottom-4 right-4 sm:bottom-auto sm:right-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2"}`}
+          >
+            <div className={`bg-[#0a0f1e] border border-white/[0.08] shadow-2xl shadow-black/50 overflow-hidden transition-all ${calcMinimized ? "rounded-xl w-48" : "rounded-2xl w-[95vw] sm:w-[600px] max-h-[90vh]"}`}>
+              {/* Window title bar */}
+              <div
+                className="flex items-center justify-between px-3 py-2 bg-[#0d1525] border-b border-white/[0.06] cursor-grab active:cursor-grabbing select-none"
+                onMouseDown={handleDragStart}
+                onTouchStart={handleDragStart}
+              >
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-1.5">
+                    <button onClick={() => setShowCalculator(false)} className="w-3 h-3 rounded-full bg-red-500/80 hover:bg-red-400 transition-colors" />
+                    <button onClick={() => { setCalcMinimized(!calcMinimized); setCalcPos({ x: 0, y: 0 }); }} className="w-3 h-3 rounded-full bg-yellow-500/80 hover:bg-yellow-400 transition-colors" />
+                    <button onClick={() => { setCalcMinimized(false); setCalcPos({ x: 0, y: 0 }); }} className="w-3 h-3 rounded-full bg-green-500/80 hover:bg-green-400 transition-colors" />
+                  </div>
+                  <span className="text-[10px] text-white/30 font-medium ml-2">{t.calculator}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <svg viewBox="0 0 48 48" className="w-4 h-4" fill="none">
+                    <path d="M24 8C18.5 8 14 11.5 14 16c0 3.5 2.5 5.5 6 7 3 1.3 4 2.2 4 3.5 0 1.5-1.5 2.5-3.5 2.5-2.5 0-4.5-1.5-5.5-3l-3 2.5C14 31 17.5 33 21 33c5 0 9-3 9-7.5 0-4-2.5-5.8-6.5-7.5-2.5-1-3.5-2-3.5-3.2 0-1.3 1.3-2.3 3.2-2.3 2 0 3.5 1 4.5 2.5l2.8-2.3C28.5 10 26 8 24 8z" fill="rgba(96,165,250,0.3)"/>
+                  </svg>
+                </div>
               </div>
-              <div className="p-3 sm:p-4">
-                <Calculator />
-              </div>
-            </motion.div>
+              {/* Calculator body */}
+              {!calcMinimized && (
+                <div className="p-3 sm:p-4 max-h-[calc(90vh-40px)] overflow-y-auto overscroll-contain">
+                  <Calculator />
+                </div>
+              )}
+              {calcMinimized && (
+                <button onClick={() => setCalcMinimized(false)} className="w-full py-3 text-xs text-white/40 hover:text-white/60 transition-colors">
+                  {t.calculator}
+                </button>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
