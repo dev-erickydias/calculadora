@@ -309,14 +309,14 @@ interface ButtonDef {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  num: "bg-[#252019] text-[#d0c8b0] text-base sm:text-lg h-[44px] sm:h-[52px]",
-  op: "bg-[#2a1a08] text-[#d4a040] text-lg sm:text-xl h-[44px] sm:h-[52px] font-semibold",
-  sci: "bg-[#142220] text-[#50a888] text-[10px] sm:text-[11px] h-[34px] sm:h-[38px] tracking-wide",
-  mem: "bg-[#1a1814] text-[#7a6a4a] text-[10px] sm:text-[11px] h-[34px] sm:h-[38px] tracking-wide",
-  fn: "bg-[#201c16] text-[#b0a890] text-sm sm:text-base h-[44px] sm:h-[52px]",
-  eq: "bg-gradient-to-b from-[#d4a843] to-[#b8922a] text-[#0c0a07] text-lg sm:text-xl h-[44px] sm:h-[52px] font-bold",
-  clear: "bg-[#2a1515] text-[#d05050] text-xs sm:text-sm h-[44px] sm:h-[52px] font-semibold",
-  mode: "bg-[#142220] text-[#50a888] text-[10px] sm:text-[11px] h-[34px] sm:h-[38px] border border-[#1e3a30] font-semibold",
+  num: "bg-[#151c2e] text-[#c8d4e8] text-base sm:text-lg h-[44px] sm:h-[52px] hover:bg-[#1a2440]",
+  op: "bg-[#1a2040] text-[#60a5fa] text-lg sm:text-xl h-[44px] sm:h-[52px] font-semibold hover:bg-[#1e2850]",
+  sci: "bg-[#101828] text-[#38bdf8] text-[10px] sm:text-[11px] h-[34px] sm:h-[38px] tracking-wide hover:bg-[#152030]",
+  mem: "bg-[#10161e] text-[#64748b] text-[10px] sm:text-[11px] h-[34px] sm:h-[38px] tracking-wide hover:bg-[#151d28]",
+  fn: "bg-[#131a28] text-[#94a3b8] text-sm sm:text-base h-[44px] sm:h-[52px] hover:bg-[#182030]",
+  eq: "bg-gradient-to-b from-[#2563eb] to-[#1d4ed8] text-white text-lg sm:text-xl h-[44px] sm:h-[52px] font-bold hover:from-[#3b82f6] hover:to-[#2563eb]",
+  clear: "bg-[#1e1525] text-[#f87171] text-xs sm:text-sm h-[44px] sm:h-[52px] font-semibold hover:bg-[#251a30]",
+  mode: "bg-[#101828] text-[#38bdf8] text-[10px] sm:text-[11px] h-[34px] sm:h-[38px] border border-[#1e3a5f] font-semibold hover:bg-[#152030]",
 };
 
 function CalcButton({ label, display, action, variant, span }: ButtonDef) {
@@ -575,49 +575,43 @@ export default function Calculator() {
   // ===== RENDER =====
   return (
     <div className="relative w-full max-w-[520px] mx-auto text-[15px] sm:text-base">
-      {/* ===== CALCULATOR BODY ===== */}
-      <div className="bg-gradient-to-b from-[#171412] to-[#131110] rounded-2xl border border-[#2a2520]/60 shadow-[0_8px_40px_rgba(0,0,0,0.5),0_2px_8px_rgba(0,0,0,0.3)] overflow-hidden">
-        {/* --- Header Bar --- */}
-        <div className="flex items-center justify-between px-5 py-2.5 border-b border-[#2a2520]/50">
-          <span className="text-[#4a4030] text-[10px] tracking-[0.35em] uppercase font-semibold font-[family-name:var(--font-geist-sans)]">
-            ARCTAN
+      <div className="bg-gradient-to-b from-[#0d1425] to-[#0a0f1e] rounded-2xl border border-white/[0.06] shadow-[0_8px_40px_rgba(0,0,0,0.5),0_0_60px_rgba(37,99,235,0.05)] overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-2.5 border-b border-white/[0.06]">
+          <span className="text-white/20 text-[10px] tracking-[0.35em] uppercase font-semibold">
+            SALARIUM
           </span>
           <div className="flex items-center gap-3">
             {state.hasMemory && (
-              <span className="text-[#c4953a] text-[10px] font-mono tracking-wider">
-                MEM
-              </span>
+              <span className="text-blue-400 text-[10px] font-mono tracking-wider">MEM</span>
             )}
-            <span className="text-[#50a888] text-[10px] font-mono font-medium">
-              {state.angleMode}
-            </span>
-            <div className="w-[5px] h-[5px] rounded-full bg-[#50a888] power-led" />
+            <span className="text-cyan-400 text-[10px] font-mono font-medium">{state.angleMode}</span>
+            <div className="w-[5px] h-[5px] rounded-full bg-blue-400 power-led" />
           </div>
         </div>
 
-        {/* --- Display --- */}
+        {/* Display */}
         <div className="px-3 pt-3 pb-2">
-          <div className="calc-display relative rounded-lg px-5 py-5 min-h-[110px] flex flex-col justify-end overflow-hidden">
-            {/* Expression line */}
+          <div className="relative rounded-xl bg-[#080d1a] px-5 py-5 min-h-[110px] flex flex-col justify-end overflow-hidden border border-white/[0.04]">
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-500/[0.02] to-transparent pointer-events-none" />
             <div
-              className="vfd-dim text-[#7a6a4a] text-right text-sm font-mono font-light truncate min-h-[20px] mb-1"
+              className="text-white/30 text-right text-sm font-mono font-light truncate min-h-[20px] mb-1"
               style={{ fontFamily: "var(--font-jetbrains)" }}
             >
               {expressionLine || "\u00A0"}
             </div>
-            {/* Result line */}
             <div
-              className="vfd-glow text-[#e8c55a] text-right text-[1.75rem] sm:text-[2.5rem] font-mono font-light truncate leading-tight"
-              style={{ fontFamily: "var(--font-jetbrains)" }}
+              className="text-blue-100 text-right text-[1.75rem] sm:text-[2.5rem] font-mono font-light truncate leading-tight"
+              style={{ fontFamily: "var(--font-jetbrains)", textShadow: "0 0 20px rgba(96,165,250,0.15)" }}
             >
               {displayValue}
             </div>
           </div>
         </div>
 
-        {/* --- Scientific Buttons Panel --- */}
+        {/* Scientific panel */}
         <div className="mx-2 sm:mx-3 mb-2">
-          <div className="bg-[#0f1614]/60 rounded-lg p-1 sm:p-1.5 border border-[#1e2a25]/40">
+          <div className="bg-[#0a1020]/80 rounded-lg p-1 sm:p-1.5 border border-white/[0.04]">
             <div className="grid grid-cols-6 gap-[2px] sm:gap-[3px]">
               {sciButtons.map((btn, i) => (
                 <CalcButton key={`sci-${i}`} {...btn} />
@@ -626,12 +620,12 @@ export default function Calculator() {
           </div>
         </div>
 
-        {/* --- Separator groove --- */}
+        {/* Separator */}
         <div className="mx-5 mb-2">
-          <div className="h-px bg-gradient-to-r from-transparent via-[#2a2520] to-transparent" />
+          <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
         </div>
 
-        {/* --- Main Buttons --- */}
+        {/* Main buttons */}
         <div className="px-2 sm:px-3 pb-3 sm:pb-4">
           <div className="grid grid-cols-4 gap-[3px] sm:gap-[5px]">
             {mainButtons.map((btn, i) => (
@@ -641,50 +635,36 @@ export default function Calculator() {
         </div>
       </div>
 
-      {/* ===== HISTORY OVERLAY ===== */}
+      {/* History overlay */}
       {state.showHistory && (
-        <div className="absolute inset-0 bg-[#0c0a07]/95 backdrop-blur-sm rounded-2xl z-10 flex flex-col history-enter overflow-hidden border border-[#2a2520]/60">
-          {/* History header */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-[#2a2520]/50">
-            <span className="text-[#c4953a] text-xs font-semibold tracking-[0.2em] uppercase font-[family-name:var(--font-geist-sans)]">
-              Historico
+        <div className="absolute inset-0 bg-[#0a0f1e]/97 backdrop-blur-sm rounded-2xl z-10 flex flex-col history-enter overflow-hidden border border-white/[0.06]">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06]">
+            <span className="text-blue-400 text-xs font-semibold tracking-[0.2em] uppercase">
+              History
             </span>
             <button
               onClick={() => dispatch({ type: "TOGGLE_HISTORY" })}
-              className="text-[#7a6a4a] hover:text-[#c0b8a0] transition-colors text-lg leading-none cursor-pointer"
+              className="text-white/30 hover:text-white/70 transition-colors text-lg leading-none cursor-pointer"
             >
-              ✕
+              &times;
             </button>
           </div>
-
-          {/* History list */}
           <div className="flex-1 overflow-y-auto p-3 space-y-1 history-scroll">
             {state.history.length === 0 ? (
-              <div className="text-[#3a3228] text-center text-sm py-12 font-[family-name:var(--font-geist-sans)]">
-                Nenhum calculo ainda
+              <div className="text-white/15 text-center text-sm py-12">
+                No calculations yet
               </div>
             ) : (
               state.history.map((entry, i) => (
                 <button
                   key={i}
-                  onClick={() =>
-                    dispatch({
-                      type: "HISTORY_ITEM",
-                      expression: entry.expression,
-                    })
-                  }
-                  className="w-full text-right p-3 rounded-lg cursor-pointer hover:bg-[#1a1612] transition-colors group"
+                  onClick={() => dispatch({ type: "HISTORY_ITEM", expression: entry.expression })}
+                  className="w-full text-right p-3 rounded-lg cursor-pointer hover:bg-white/[0.04] transition-colors group"
                 >
-                  <div
-                    className="text-[#5a5040] text-xs font-mono truncate group-hover:text-[#8a7a55] transition-colors"
-                    style={{ fontFamily: "var(--font-jetbrains)" }}
-                  >
+                  <div className="text-white/25 text-xs font-mono truncate group-hover:text-white/40 transition-colors" style={{ fontFamily: "var(--font-jetbrains)" }}>
                     {entry.expression}
                   </div>
-                  <div
-                    className="text-[#c4953a] text-lg font-mono font-light group-hover:text-[#e8c55a] transition-colors"
-                    style={{ fontFamily: "var(--font-jetbrains)" }}
-                  >
+                  <div className="text-blue-400 text-lg font-mono font-light group-hover:text-blue-300 transition-colors" style={{ fontFamily: "var(--font-jetbrains)" }}>
                     = {entry.result}
                   </div>
                 </button>

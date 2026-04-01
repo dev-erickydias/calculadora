@@ -218,7 +218,32 @@ export default function Home() {
       </div>
 
       <footer className="border-t border-white/[0.04] mt-16">
-        <div className="max-w-6xl mx-auto px-4 py-6 space-y-3">
+        <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+          {/* Feedback / Update request */}
+          <div className="bg-gradient-to-r from-blue-500/[0.06] to-cyan-500/[0.04] border border-white/[0.06] rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex-1">
+              <p className="text-sm text-white/70 font-medium mb-1">
+                {lang === "pt" ? "Dados desatualizados? Tem sugestões?" : "Outdated data? Have suggestions?"}
+              </p>
+              <p className="text-xs text-white/30">
+                {lang === "pt"
+                  ? "Se o salário mínimo mudou ou tem ideias de novas funcionalidades, entre em contacto."
+                  : "If minimum wages have changed or you have feature ideas, get in touch."}
+              </p>
+            </div>
+            <a
+              href="https://www.linkedin.com/in/dev-erickydias/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#0A66C2]/20 border border-[#0A66C2]/30 text-[#0A66C2] hover:bg-[#0A66C2]/30 transition-colors text-sm font-medium shrink-0"
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+              LinkedIn
+            </a>
+          </div>
+
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-white/25">
             <span>{t.dataSource}</span><span>{t.holidaysSource}</span>
           </div>
@@ -237,10 +262,10 @@ export default function Home() {
               exit={{ opacity: 0, y: 100 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full sm:w-auto max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-y-auto overscroll-contain rounded-t-2xl sm:rounded-2xl bg-[#0c0a07] sm:m-4"
+              className="relative w-full sm:w-auto max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-y-auto overscroll-contain rounded-t-2xl sm:rounded-2xl bg-[#0a0f1e] sm:m-4"
             >
               {/* Close bar (mobile drag indicator + close button) */}
-              <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-2 bg-[#0c0a07]/95 backdrop-blur-sm border-b border-white/5">
+              <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-2 bg-[#0a0f1e]/95 backdrop-blur-sm border-b border-white/5">
                 <div className="w-10 h-1 rounded-full bg-white/20 sm:hidden mx-auto absolute left-1/2 -translate-x-1/2 top-2" />
                 <span className="text-xs text-white/30 font-medium">{t.calculator}</span>
                 <button onClick={() => setShowCalculator(false)} className="w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-colors text-sm">&times;</button>
