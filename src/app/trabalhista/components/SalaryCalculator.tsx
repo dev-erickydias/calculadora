@@ -56,59 +56,70 @@ export default function SalaryCalculator({ country }: Props) {
 
   const defaultMonthly = country.minimumWage.grossMonthly;
 
-  // Derive hourly from whichever mode is active
-  const baseHourly = useMemo(() => {
-    if (inputMode === "hour") {
-      return customHourly ? parseFloat(customHourly) : defaultHourly;
-    } else {
-      const m = customMonthly ? parseFloat(customMonthly) : defaultMonthly;
-      return m / (standardHours * weeksPerMonth);
-    }
-  }, [inputMode, customHourly, customMonthly, defaultHourly, defaultMonthly, standardHours, weeksPerMonth]);
-
   const inputDailyHours = dailyHours ? parseFloat(dailyHours) : null;
   const inputDays = daysWorked ? parseFloat(daysWorked) : null;
 
   const calc = useMemo(() => {
-    if (!baseHourly || baseHourly <= 0) return null;
+    // Effective hours/day and days/month (user input or country default)
+    const effectiveHpd = inputDailyHours !== null && inputDailyHours > 0 ? inputDailyHours : defaultHoursPerDay;
+    const effectiveDays = inputDays !== null && inputDays > 0 ? inputDays : standardMonthlyDays;
+    const effectiveTotalHours = effectiveHpd * effectiveDays;
 
-    const hourly = baseHourly;
-    const daily = hourly * defaultHoursPerDay;
-    const weekly = hourly * standardHours;
-    const monthly = hourly * standardHours * weeksPerMonth;
+    // Derive hourly rate based on mode
+    let hourly: number;
+    if (inputMode === "hour") {
+      hourly = customHourly ? parseFloat(customHourly) : defaultHourly;
+    } else {
+      const m = customMonthly ? parseFloat(customMonthly) : defaultMonthly;
+      // Use user's actual schedule to derive hourly rate
+      hourly = m / effectiveTotalHours;
+    }
+
+    if (!hourly || hourly <= 0) return null;
+
+    const daily = hourly * effectiveHpd;
+    const weekly = daily * Math.min(effectiveDays / weeksPerMonth, 7);
+    const monthly = hourly * effectiveTotalHours;
     const annual = monthly * country.minimumWage.annualPayments;
     const totalDeductions = country.taxes.averageEffectiveRate + country.taxes.socialContributions;
 
+    // Custom calc card (shown when user entered hours/day or days)
+    const hasCustomInput = inputDailyHours !== null || inputDays !== null;
     let customCalc = null;
-    const hpd = inputDailyHours !== null && inputDailyHours > 0 ? inputDailyHours : null;
-    const days = inputDays !== null && inputDays > 0 ? inputDays : null;
 
-    if (hpd !== null || days !== null) {
-      const effectiveHpd = hpd ?? defaultHoursPerDay;
-      const effectiveDays = days ?? standardMonthlyDays;
-      const totalHours = effectiveHpd * effectiveDays;
-      const regularHrs = Math.min(totalHours, standardMonthlyHours);
-      const overtimeHrs = Math.max(0, totalHours - standardMonthlyHours);
-      const regularPay = regularHrs * hourly;
-      const overtimePay = overtimeHrs * hourly * 1.5;
-      const gross = regularPay + overtimePay;
+    if (hasCustomInput) {
+      const regularHrs = Math.min(effectiveTotalHours, standardMonthlyHours);
+      const overtimeHrs = Math.max(0, effectiveTotalHours - standardMonthlyHours);
+
+      // In month mode, the entered salary IS the total — no overtime split
+      let regularPay: number, overtimePay: number, gross: number;
+      if (inputMode === "month" && (customMonthly || defaultMonthly)) {
+        gross = customMonthly ? parseFloat(customMonthly) : defaultMonthly;
+        regularPay = gross;
+        overtimePay = 0;
+      } else {
+        regularPay = regularHrs * hourly;
+        overtimePay = overtimeHrs * hourly * 1.5;
+        gross = regularPay + overtimePay;
+      }
 
       customCalc = {
         hoursPerDay: effectiveHpd,
         days: effectiveDays,
-        totalHours: Math.round(totalHours * 10) / 10,
+        totalHours: Math.round(effectiveTotalHours * 10) / 10,
         regularHours: Math.round(regularHrs * 10) / 10,
         overtimeHours: Math.round(overtimeHrs * 10) / 10,
         regularPay,
         overtimePay,
         gross,
         net: gross * (1 - totalDeductions),
-        dailyGross: effectiveHpd * hourly,
+        dailyGross: daily,
+        hourlyRate: hourly,
       };
     }
 
     return { hourly, daily, weekly, monthly, annual, totalDeductions, customCalc };
-  }, [baseHourly, country, inputDailyHours, inputDays, standardHours, standardMonthlyHours, standardMonthlyDays, defaultHoursPerDay, weeksPerMonth]);
+  }, [inputMode, customHourly, customMonthly, defaultHourly, defaultMonthly, country, inputDailyHours, inputDays, standardMonthlyHours, standardMonthlyDays, defaultHoursPerDay, weeksPerMonth]);
 
   const fmt = (v: number) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const fmtLocal = (v: number) => {
@@ -208,6 +219,7 @@ export default function SalaryCalculator({ country }: Props) {
             <div className="bg-gradient-to-r from-cyan-500/[0.08] to-transparent border border-cyan-400/20 rounded-2xl p-5">
               <p className="text-xs text-cyan-300/70 uppercase tracking-wider mb-3 font-medium">
                 {t.results} — {calc.customCalc.hoursPerDay}h/{t.days.slice(0, 3)} x {calc.customCalc.days} {t.days} = {calc.customCalc.totalHours}h
+                {calc.customCalc.hourlyRate && <> ({fmt(calc.customCalc.hourlyRate)} €/{t.hour})</>}
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                 <div>
