@@ -50,6 +50,9 @@ export interface Translation {
   overtimeHours: string;
   regularHours: string;
   results: string;
+  inputByHour: string;
+  inputByMonth: string;
+  grossMonthlyInput: string;
   noMinWageTitle: string;
   noMinWageDesc: string;
   enterSalary: string;
@@ -153,6 +156,9 @@ const en: Translation = {
   overtimeHours: "Overtime hours",
   regularHours: "Regular hours",
   results: "Results",
+  inputByHour: "Per hour",
+  inputByMonth: "Per month",
+  grossMonthlyInput: "Gross monthly (€)",
   noMinWageTitle: "does not have a statutory minimum wage",
   noMinWageDesc: "Enter a value below to calculate:",
   enterSalary: "Gross monthly salary in €",
@@ -249,6 +255,9 @@ const pt: Translation = {
   overtimeHours: "Horas extra",
   regularHours: "Horas normais",
   results: "Resultados",
+  inputByHour: "Por hora",
+  inputByMonth: "Por mês",
+  grossMonthlyInput: "Bruto mensal (€)",
   noMinWageTitle: "não possui salário mínimo estatutário",
   noMinWageDesc: "Insira um valor abaixo para calcular:",
   enterSalary: "Salário mensal bruto em €",
