@@ -1,200 +1,179 @@
 <p align="center">
-  <img src="public/icon.svg" width="80" alt="Salarium" />
+  <img src="public/icon.svg" width="100" alt="Salarium Logo" />
 </p>
 
-<h1 align="center">Salarium</h1>
-<p align="center"><strong>EU Labor Calculator</strong> — Minimum wages, vacation, 13th salary & holidays for 27 European countries.</p>
+<h1 align="center">🪙 Salarium</h1>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Next.js-16-black?logo=next.js" alt="Next.js" />
-  <img src="https://img.shields.io/badge/TypeScript-5-blue?logo=typescript" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss" alt="Tailwind" />
-  <img src="https://img.shields.io/badge/Supabase-Postgres-3ECF8E?logo=supabase" alt="Supabase" />
-  <img src="https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel" alt="Vercel" />
+  <strong>Calculadora Trabalhista da União Europeia</strong><br/>
+  Salários mínimos, férias, 13º salário e feriados para os 27 países da UE.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-16.2.1-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js" />
+  <img src="https://img.shields.io/badge/React-19.2.4-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
+  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Framer_Motion-12-FF0055?style=for-the-badge&logo=framer&logoColor=white" alt="Framer Motion" />
+  <img src="https://img.shields.io/badge/Supabase-Analytics-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
+  <img src="https://img.shields.io/badge/Deploy-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/🌍_Idiomas-23-blueviolet?style=flat-square" alt="23 Idiomas" />
+  <img src="https://img.shields.io/badge/🇪🇺_Países-27-blue?style=flat-square" alt="27 Países" />
+  <img src="https://img.shields.io/badge/📊_Dados-Eurostat_2025--2026-green?style=flat-square" alt="Dados Eurostat" />
 </p>
 
 ---
 
-## About
+## 📸 Screenshots
 
-**Salarium** (from Latin *salarium* — the origin of the word "salary", as Roman soldiers were paid in salt) is a free, open-source web tool for calculating labor costs across the European Union.
+<p align="center">
+  <img src="public/logo.svg" width="300" alt="Salarium Banner" />
+</p>
 
-Select any of the 27 EU countries, see the official minimum wage, and instantly calculate:
-- Hourly, daily, weekly, monthly and annual salary breakdowns
-- Proportional 13th and 14th salary
-- Vacation pay with country-specific bonuses
-- National holidays with interactive calendar
+> 🖥️ Interface escura moderna com seleção de países, calculadoras interativas e calendário de feriados.
 
-All data is sourced from **Eurostat**, **Eurofound**, and official government portals.
+---
 
-## Features
+## 📖 Sobre
 
-### Salary Calculator
-- Input by **hour** or by **month** — toggle between modes
-- Custom **hours/day** and **days/month** for precise calculations
-- Overtime detection at 150% (EU standard)
-- Gross and estimated net with country tax rates
-- Local currency conversion for non-EUR countries (PLN, CZK, HUF, RON, BGN)
+**Salarium** (do latim *salarium* — a origem da palavra "salário", pois os soldados romanos eram pagos com sal) é uma ferramenta web gratuita e open-source para cálculos trabalhistas em toda a União Europeia.
 
-### 13th Salary Calculator
-- Proportional 13th and 14th salary with adjustable months slider (1-12)
-- Country-specific rules: Portugal/Spain/Greece (14 payments), Belgium (13th), Netherlands (8% vakantiegeld)
-- Shows vacation bonuses (regres, lomaraha, semestertillagg)
+Selecione qualquer um dos **27 países da UE**, veja o salário mínimo oficial e calcule instantaneamente todos os valores trabalhistas.
 
-### Vacation Calculator
-- Legal minimum and common practice days per country
-- Daily rate calculation based on actual working days
-- Country-specific bonuses: subsídio de férias (PT), vakantiegeld (NL), dubbel vakantiegeld (BE), Urlaubsgeld (AT)
+---
 
-### National Holidays
-- Live data from [Nager.Date API](https://date.nager.at)
-- Interactive calendar with European week format (Mon-Sun)
-- Custom **days off** selector (choose your weekly rest days)
-- Stats: working days/year, holidays on workdays, "lost" holidays
-- Click any day for detailed popup with holiday info
+## ✨ Funcionalidades
 
-### Scientific Calculator
-- Floating window (draggable, minimizable, expandable)
-- Full scientific functions: sin, cos, tan, log, ln, sqrt, factorial, powers
-- Angle modes (DEG/RAD), memory operations, calculation history
-- Keyboard support
+| 🎯 Funcionalidade | 📝 Descrição |
+|---|---|
+| 💰 **Calculadora de Salário** | Valores por hora, dia, semana, mês e ano com detecção automática de horas extras (150%) |
+| 🎄 **13º e 14º Salário** | Cálculo proporcional com slider de meses trabalhados |
+| 🏖️ **Calculadora de Férias** | Valor de férias com bônus específicos por país |
+| 📅 **Calendário de Feriados** | Calendário interativo com feriados nacionais via API (date.nager.at) |
+| 🧮 **Calculadora Científica** | Janela flutuante estilo macOS com funções trigonométricas, logaritmos, memória e histórico |
+| 🌍 **23 Idiomas** | EN, PT, DE, FR, ES, IT, NL, PL, RO, CS, HU, BG, EL, HR, SK, SL, LT, LV, ET, MT, FI, SV, DA |
+| 🇪🇺 **27 Países da UE** | Dados completos de salário mínimo, jornada, férias, impostos |
+| 💱 **Conversão de Moeda** | Suporte a moedas locais (PLN, HUF, RON, CZK, BGN, SEK, DKK) |
+| 📊 **Bruto/Líquido** | Estimativa de valores líquidos com taxas de imposto e contribuições sociais |
+| 🔄 **Persistência Local** | Todos os inputs e preferências salvos no localStorage |
+| 📱 **Responsivo** | Design adaptável para desktop, tablet e mobile |
+| ✨ **Animações** | Transições fluidas com Framer Motion |
 
-### Internationalization
-23 EU languages supported:
+---
 
-| Language | Language | Language |
-|----------|----------|----------|
-| English (default) | Nederlands | Lietuviu |
-| Portugues | Polski | Latviesu |
-| Deutsch | Romana | Eesti |
-| Francais | Cestina | Malti |
-| Espanol | Magyar | Suomi |
-| Italiano | Bulgarski | Svenska |
-| Ellenika | Hrvatski | Dansk |
-| | Slovencina / Slovenscina | |
+## 🛠️ Tecnologias
 
-## Country Coverage
+<table align="center">
+  <tr>
+    <td align="center"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" width="40"/><br/><strong>Next.js 16</strong></td>
+    <td align="center"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" width="40"/><br/><strong>React 19</strong></td>
+    <td align="center"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" width="40"/><br/><strong>TypeScript 5</strong></td>
+    <td align="center"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg" width="40"/><br/><strong>Tailwind CSS 4</strong></td>
+  </tr>
+  <tr>
+    <td align="center">🎞️<br/><strong>Framer Motion</strong></td>
+    <td align="center"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/supabase/supabase-original.svg" width="40"/><br/><strong>Supabase</strong></td>
+    <td align="center"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vercel/vercel-original.svg" width="40"/><br/><strong>Vercel</strong></td>
+    <td align="center"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/eslint/eslint-original.svg" width="40"/><br/><strong>ESLint 9</strong></td>
+  </tr>
+</table>
 
-### 22 EU countries with statutory minimum wage
-| Country | Gross/month | Defined per | Payments |
-|---------|------------|-------------|----------|
-| Luxembourg | 2,570.93 EUR | month | 12 |
-| Germany | 2,891 EUR | hour (13.90 EUR/h) | 12 |
-| Netherlands | 2,550 EUR | hour (14.71 EUR/h) | 12 |
-| Ireland | 2,282 EUR | hour (13.50 EUR/h) | 12 |
-| Belgium | 2,029.88 EUR | month | 13 |
-| France | 1,801.80 EUR | hour (11.88 EUR/h) | 12 |
-| Spain | 1,184 EUR | month | 14 |
-| Slovenia | 1,277.72 EUR | month | 12 |
-| Lithuania | 1,038 EUR | month | 12 |
-| Poland | 4,666 PLN (~1,100 EUR) | month | 12 |
-| Greece | 1,027 EUR | month | 14 |
-| Portugal | 870 EUR | month | 14 |
-| Cyprus | 1,000 EUR | month | 12 |
-| Croatia | 970 EUR | month | 12 |
-| Malta | 961.05 EUR | week | 12 |
-| Estonia | 886 EUR | month | 12 |
-| Czechia | 20,800 CZK (~832 EUR) | month | 12 |
-| Slovakia | 816 EUR | month | 12 |
-| Romania | 4,050 RON (~814 EUR) | month | 12 |
-| Latvia | 740 EUR | month | 12 |
-| Hungary | 290,800 HUF (~707 EUR) | month | 12 |
-| Bulgaria | 1,077 BGN (~551 EUR) | month | 12 |
+---
 
-### 5 EU countries without statutory minimum wage
-Denmark, Italy, Austria, Finland, Sweden — wages set via collective agreements.
+## 🚀 Como Usar
 
-## Tech Stack
+1. **Selecione um país** 🇪🇺 — Clique na bandeira de qualquer país da UE
+2. **Veja o salário mínimo** 💶 — Valores oficiais atualizados (Eurostat 2025-2026)
+3. **Navegue pelas abas** 📑 — Salário, 13º, Férias ou Feriados
+4. **Personalize os valores** ✏️ — Altere horas, dias trabalhados ou salário base
+5. **Use a calculadora** 🧮 — Clique no ícone no header para abrir a calculadora científica
+6. **Mude o idioma** 🌐 — Selecione entre 23 idiomas disponíveis
 
-| Technology | Purpose |
-|-----------|---------|
-| [Next.js 16](https://nextjs.org) | React framework with App Router |
-| [TypeScript 5](https://typescriptlang.org) | Type safety |
-| [Tailwind CSS 4](https://tailwindcss.com) | Styling |
-| [Framer Motion](https://framer.com/motion) | Animations |
-| [Supabase](https://supabase.com) | Database (wage data + anonymous analytics) |
-| [Nager.Date API](https://date.nager.at) | Public holidays |
-| [Vercel](https://vercel.com) | Deployment |
+---
 
-## Project Structure
-
-```
-src/
-  app/
-    page.tsx                          # Main page (unified app)
-    layout.tsx                        # Root layout with LanguageProvider
-    globals.css                       # Global styles
-    components/
-      Calculator.tsx                  # Scientific calculator (700+ lines)
-    trabalhista/
-      page.tsx                        # Redirect to /
-      components/
-        CountrySelector.tsx           # Country grid with flags & search
-        SalaryCalculator.tsx          # Hourly/monthly salary breakdown
-        ThirteenthSalaryCalculator.tsx # 13th/14th proportional calc
-        VacationCalculator.tsx        # Vacation pay calculator
-        HolidaysPanel.tsx             # Calendar + holidays + stats
-  context/
-    LanguageContext.tsx               # i18n context provider
-  data/
-    countries.ts                      # 27 EU countries dataset
-    translations.ts                   # 23 language translations
-  lib/
-    format.ts                         # Shared formatting utilities
-    supabase.ts                       # Supabase client + helpers
-public/
-  icon.svg                            # Favicon (S lettermark)
-  logo.svg                            # Full logo with text
-```
-
-## Getting Started
+## 📥 Como Clonar e Rodar
 
 ```bash
-# Install dependencies
+# 📋 Clonar o repositório
+git clone https://github.com/dev-erickydias/calculadora.git
+
+# 📂 Entrar na pasta do projeto
+cd calculadora
+
+# 📦 Instalar as dependências
 npm install
 
-# Run development server
+# 🚀 Iniciar o servidor de desenvolvimento
 npm run dev
-
-# Build for production
-npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+> 🌐 Acesse **http://localhost:3000** no seu navegador.
 
-### Environment Variables (optional)
+### 📜 Scripts Disponíveis
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+| Comando | Descrição |
+|---|---|
+| `npm run dev` | 🔧 Servidor de desenvolvimento |
+| `npm run build` | 📦 Build de produção |
+| `npm start` | 🚀 Servidor de produção |
+| `npm run lint` | 🔍 Verificação de código |
+
+---
+
+## 📂 Estrutura do Projeto
+
+```
+📁 calculadora/
+├── 📁 public/          → Arquivos estáticos (SVGs, ícones)
+├── 📁 src/
+│   ├── 📁 app/         → Páginas e componentes (App Router)
+│   ├── 📁 context/     → Context de idioma (i18n)
+│   ├── 📁 data/        → Dados dos países e traduções
+│   └── 📁 lib/         → Utilitários (formatação, Supabase)
+├── 📄 package.json
+├── 📄 next.config.ts
+└── 📄 tsconfig.json
 ```
 
-## Data Sources
+> 📘 Para documentação técnica detalhada de cada arquivo, consulte o [`doc.md`](./doc.md).
 
-| Source | Data | Update frequency |
-|--------|------|-----------------|
-| [Eurostat](https://ec.europa.eu/eurostat) | Minimum wages | Annually (January) |
-| [Eurofound](https://eurofound.europa.eu) | Labor conditions | Annually |
-| [Nager.Date](https://date.nager.at) | Public holidays | Real-time API |
-| National legislation | Country-specific rules | As needed |
+---
 
-## Disclaimer
+## 👤 Autor
 
-- Minimum wage values are for reference only and may not reflect the most recent changes. Always consult the official legislation of each country.
-- Tax calculations are rough estimates and do not replace professional tax advice.
-- Holiday data from Nager.Date API may not include regional or local holidays.
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/dev-erickydias">
+        <img src="https://github.com/dev-erickydias.png" width="100" style="border-radius: 50%;" alt="Ericky Dias"/><br/>
+        <strong>Ericky Dias</strong>
+      </a><br/>
+      <a href="https://github.com/dev-erickydias">🐙 GitHub</a> •
+      <a href="https://www.linkedin.com/in/erickydias/">💼 LinkedIn</a>
+    </td>
+  </tr>
+</table>
 
-## Contributing
+---
 
-Found outdated data or have feature ideas? [Contact via LinkedIn](https://www.linkedin.com/in/erickydias/).
+## 📊 Fontes de Dados
 
-## License
+- 🏛️ **Eurostat** — Salários mínimos na UE
+- 📋 **Eurofound** — Condições de trabalho
+- 📅 **Nager.Date API** — Feriados nacionais
+- 🏢 **Portais governamentais** — Dados oficiais de cada país
 
-MIT
+---
+
+## 📝 Licença
+
+Este projeto é open-source. Sinta-se à vontade para contribuir!
 
 ---
 
 <p align="center">
-  <strong>Salarium</strong> — Because every worker deserves to know their rights.<br/>
-  <sub>Built with care for the European workforce.</sub>
+  Feito com 💙 por <a href="https://github.com/dev-erickydias"><strong>Ericky Dias</strong></a>
 </p>
